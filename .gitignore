@@ -1,0 +1,13 @@
+node_modules/
+__pycache__/
+.DS_Store
+Thumbs.db
+exports/
+runs/
+backups/
+/evidence.json
+/repair-plan.json
+/repair-prompt.md
+/execution-result.json
+*.zip
+*.eext

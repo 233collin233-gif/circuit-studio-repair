@@ -1,0 +1,656 @@
+{
+  "kind": "recorder",
+  "schemaVersion": 2,
+  "sessionId": "sess-1790079500605-lsgeat",
+  "sessionStart": "2026-09-22T12:18:20.606Z",
+  "sessionEnd": "2026-09-22T12:18:20.648Z",
+  "exportedAt": "2026-09-22T12:18:20.648Z",
+  "recording": false,
+  "document": {
+    "uuid": "SYNTHETIC-EXAMPLE",
+    "type": "SCH_PAGE",
+    "name": "Synthetic example; not a participant circuit"
+  },
+  "eventCount": 1,
+  "events": [
+    {
+      "seq": 1,
+      "time": "2026-09-22T12:18:20.647Z",
+      "scope": "sch",
+      "source": "document-source",
+      "documentId": "SYNTHETIC-EXAMPLE",
+      "eventType": "wire.modify",
+      "primitiveId": "w1",
+      "primitiveType": "WIRE",
+      "line": [
+        {
+          "id": "l1",
+          "startX": 0,
+          "startY": 0,
+          "endX": 20,
+          "endY": 10
+        }
+      ],
+      "before": {
+        "id": "w1",
+        "primitiveType": "WIRE",
+        "type": "wire",
+        "attributes": {},
+        "line": [
+          {
+            "id": "l1",
+            "startX": 0,
+            "startY": 0,
+            "endX": 20,
+            "endY": 0
+          }
+        ],
+        "records": [
+          {
+            "id": "l1",
+            "type": "LINE",
+            "body": {
+              "lineGroup": "w1",
+              "startX": 0,
+              "startY": 0,
+              "endX": 20,
+              "endY": 0
+            }
+          },
+          {
+            "id": "w1",
+            "type": "WIRE",
+            "body": {}
+          }
+        ],
+        "connections": {
+          "basis": "coordinate-contact",
+          "pinResolution": "available",
+          "segmentContacts": [
+            {
+              "x": 0,
+              "y": 0,
+              "pin": {
+                "primitiveId": "r1p2",
+                "componentId": "r1",
+                "designator": "R1",
+                "number": "2",
+                "name": "2",
+                "x": 0,
+                "y": 0
+              },
+              "segmentIds": [
+                "l1"
+              ]
+            },
+            {
+              "x": 20,
+              "y": 0,
+              "pin": {
+                "primitiveId": "u1pin",
+                "componentId": "u1",
+                "designator": "U1",
+                "number": "1",
+                "name": "IN",
+                "x": 20,
+                "y": 0
+              },
+              "segmentIds": [
+                "l1"
+              ]
+            }
+          ],
+          "endpoints": [
+            {
+              "x": 0,
+              "y": 0,
+              "pins": [
+                {
+                  "primitiveId": "r1p2",
+                  "componentId": "r1",
+                  "designator": "R1",
+                  "number": "2",
+                  "name": "2",
+                  "x": 0,
+                  "y": 0
+                }
+              ],
+              "wireIds": []
+            },
+            {
+              "x": 20,
+              "y": 0,
+              "pins": [
+                {
+                  "primitiveId": "u1pin",
+                  "componentId": "u1",
+                  "designator": "U1",
+                  "number": "1",
+                  "name": "IN",
+                  "x": 20,
+                  "y": 0
+                }
+              ],
+              "wireIds": []
+            }
+          ]
+        }
+      },
+      "after": {
+        "id": "w1",
+        "primitiveType": "WIRE",
+        "type": "wire",
+        "attributes": {},
+        "line": [
+          {
+            "id": "l1",
+            "startX": 0,
+            "startY": 0,
+            "endX": 20,
+            "endY": 10
+          }
+        ],
+        "records": [
+          {
+            "id": "l1",
+            "type": "LINE",
+            "body": {
+              "lineGroup": "w1",
+              "startX": 0,
+              "startY": 0,
+              "endX": 20,
+              "endY": 10
+            }
+          },
+          {
+            "id": "w1",
+            "type": "WIRE",
+            "body": {}
+          }
+        ],
+        "connections": {
+          "basis": "coordinate-contact",
+          "pinResolution": "available",
+          "segmentContacts": [
+            {
+              "x": 0,
+              "y": 0,
+              "pin": {
+                "primitiveId": "r1p2",
+                "componentId": "r1",
+                "designator": "R1",
+                "number": "2",
+                "name": "2",
+                "x": 0,
+                "y": 0
+              },
+              "segmentIds": [
+                "l1"
+              ]
+            },
+            {
+              "x": 20,
+              "y": 10,
+              "pin": {
+                "primitiveId": "u1pout",
+                "componentId": "u1",
+                "designator": "U1",
+                "number": "2",
+                "name": "OUT",
+                "x": 20,
+                "y": 10
+              },
+              "segmentIds": [
+                "l1"
+              ]
+            }
+          ],
+          "endpoints": [
+            {
+              "x": 0,
+              "y": 0,
+              "pins": [
+                {
+                  "primitiveId": "r1p2",
+                  "componentId": "r1",
+                  "designator": "R1",
+                  "number": "2",
+                  "name": "2",
+                  "x": 0,
+                  "y": 0
+                }
+              ],
+              "wireIds": []
+            },
+            {
+              "x": 20,
+              "y": 10,
+              "pins": [
+                {
+                  "primitiveId": "u1pout",
+                  "componentId": "u1",
+                  "designator": "U1",
+                  "number": "2",
+                  "name": "OUT",
+                  "x": 20,
+                  "y": 10
+                }
+              ],
+              "wireIds": []
+            }
+          ]
+        }
+      },
+      "_changes": {
+        "line": {
+          "from": [
+            {
+              "id": "l1",
+              "startX": 0,
+              "startY": 0,
+              "endX": 20,
+              "endY": 0
+            }
+          ],
+          "to": [
+            {
+              "id": "l1",
+              "startX": 0,
+              "startY": 0,
+              "endX": 20,
+              "endY": 10
+            }
+          ],
+          "fromExists": true,
+          "toExists": true
+        },
+        "records": {
+          "from": [
+            {
+              "id": "l1",
+              "type": "LINE",
+              "body": {
+                "lineGroup": "w1",
+                "startX": 0,
+                "startY": 0,
+                "endX": 20,
+                "endY": 0
+              }
+            },
+            {
+              "id": "w1",
+              "type": "WIRE",
+              "body": {}
+            }
+          ],
+          "to": [
+            {
+              "id": "l1",
+              "type": "LINE",
+              "body": {
+                "lineGroup": "w1",
+                "startX": 0,
+                "startY": 0,
+                "endX": 20,
+                "endY": 10
+              }
+            },
+            {
+              "id": "w1",
+              "type": "WIRE",
+              "body": {}
+            }
+          ],
+          "fromExists": true,
+          "toExists": true
+        },
+        "connections.segmentContacts": {
+          "from": [
+            {
+              "x": 0,
+              "y": 0,
+              "pin": {
+                "primitiveId": "r1p2",
+                "componentId": "r1",
+                "designator": "R1",
+                "number": "2",
+                "name": "2",
+                "x": 0,
+                "y": 0
+              },
+              "segmentIds": [
+                "l1"
+              ]
+            },
+            {
+              "x": 20,
+              "y": 0,
+              "pin": {
+                "primitiveId": "u1pin",
+                "componentId": "u1",
+                "designator": "U1",
+                "number": "1",
+                "name": "IN",
+                "x": 20,
+                "y": 0
+              },
+              "segmentIds": [
+                "l1"
+              ]
+            }
+          ],
+          "to": [
+            {
+              "x": 0,
+              "y": 0,
+              "pin": {
+                "primitiveId": "r1p2",
+                "componentId": "r1",
+                "designator": "R1",
+                "number": "2",
+                "name": "2",
+                "x": 0,
+                "y": 0
+              },
+              "segmentIds": [
+                "l1"
+              ]
+            },
+            {
+              "x": 20,
+              "y": 10,
+              "pin": {
+                "primitiveId": "u1pout",
+                "componentId": "u1",
+                "designator": "U1",
+                "number": "2",
+                "name": "OUT",
+                "x": 20,
+                "y": 10
+              },
+              "segmentIds": [
+                "l1"
+              ]
+            }
+          ],
+          "fromExists": true,
+          "toExists": true
+        },
+        "connections.endpoints": {
+          "from": [
+            {
+              "x": 0,
+              "y": 0,
+              "pins": [
+                {
+                  "primitiveId": "r1p2",
+                  "componentId": "r1",
+                  "designator": "R1",
+                  "number": "2",
+                  "name": "2",
+                  "x": 0,
+                  "y": 0
+                }
+              ],
+              "wireIds": []
+            },
+            {
+              "x": 20,
+              "y": 0,
+              "pins": [
+                {
+                  "primitiveId": "u1pin",
+                  "componentId": "u1",
+                  "designator": "U1",
+                  "number": "1",
+                  "name": "IN",
+                  "x": 20,
+                  "y": 0
+                }
+              ],
+              "wireIds": []
+            }
+          ],
+          "to": [
+            {
+              "x": 0,
+              "y": 0,
+              "pins": [
+                {
+                  "primitiveId": "r1p2",
+                  "componentId": "r1",
+                  "designator": "R1",
+                  "number": "2",
+                  "name": "2",
+                  "x": 0,
+                  "y": 0
+                }
+              ],
+              "wireIds": []
+            },
+            {
+              "x": 20,
+              "y": 10,
+              "pins": [
+                {
+                  "primitiveId": "u1pout",
+                  "componentId": "u1",
+                  "designator": "U1",
+                  "number": "2",
+                  "name": "OUT",
+                  "x": 20,
+                  "y": 10
+                }
+              ],
+              "wireIds": []
+            }
+          ],
+          "fromExists": true,
+          "toExists": true
+        }
+      },
+      "connections": {
+        "before": {
+          "basis": "coordinate-contact",
+          "pinResolution": "available",
+          "segmentContacts": [
+            {
+              "x": 0,
+              "y": 0,
+              "pin": {
+                "primitiveId": "r1p2",
+                "componentId": "r1",
+                "designator": "R1",
+                "number": "2",
+                "name": "2",
+                "x": 0,
+                "y": 0
+              },
+              "segmentIds": [
+                "l1"
+              ]
+            },
+            {
+              "x": 20,
+              "y": 0,
+              "pin": {
+                "primitiveId": "u1pin",
+                "componentId": "u1",
+                "designator": "U1",
+                "number": "1",
+                "name": "IN",
+                "x": 20,
+                "y": 0
+              },
+              "segmentIds": [
+                "l1"
+              ]
+            }
+          ],
+          "endpoints": [
+            {
+              "x": 0,
+              "y": 0,
+              "pins": [
+                {
+                  "primitiveId": "r1p2",
+                  "componentId": "r1",
+                  "designator": "R1",
+                  "number": "2",
+                  "name": "2",
+                  "x": 0,
+                  "y": 0
+                }
+              ],
+              "wireIds": []
+            },
+            {
+              "x": 20,
+              "y": 0,
+              "pins": [
+                {
+                  "primitiveId": "u1pin",
+                  "componentId": "u1",
+                  "designator": "U1",
+                  "number": "1",
+                  "name": "IN",
+                  "x": 20,
+                  "y": 0
+                }
+              ],
+              "wireIds": []
+            }
+          ]
+        },
+        "after": {
+          "basis": "coordinate-contact",
+          "pinResolution": "available",
+          "segmentContacts": [
+            {
+              "x": 0,
+              "y": 0,
+              "pin": {
+                "primitiveId": "r1p2",
+                "componentId": "r1",
+                "designator": "R1",
+                "number": "2",
+                "name": "2",
+                "x": 0,
+                "y": 0
+              },
+              "segmentIds": [
+                "l1"
+              ]
+            },
+            {
+              "x": 20,
+              "y": 10,
+              "pin": {
+                "primitiveId": "u1pout",
+                "componentId": "u1",
+                "designator": "U1",
+                "number": "2",
+                "name": "OUT",
+                "x": 20,
+                "y": 10
+              },
+              "segmentIds": [
+                "l1"
+              ]
+            }
+          ],
+          "endpoints": [
+            {
+              "x": 0,
+              "y": 0,
+              "pins": [
+                {
+                  "primitiveId": "r1p2",
+                  "componentId": "r1",
+                  "designator": "R1",
+                  "number": "2",
+                  "name": "2",
+                  "x": 0,
+                  "y": 0
+                }
+              ],
+              "wireIds": []
+            },
+            {
+              "x": 20,
+              "y": 10,
+              "pins": [
+                {
+                  "primitiveId": "u1pout",
+                  "componentId": "u1",
+                  "designator": "U1",
+                  "number": "2",
+                  "name": "OUT",
+                  "x": 20,
+                  "y": 10
+                }
+              ],
+              "wireIds": []
+            }
+          ]
+        }
+      },
+      "nativeEventSeqs": [
+        1
+      ],
+      "_desc": "修改 WIRE w1 · (0,0) [R1.2] ↔ (20,0) [U1.1] → (0,0) [R1.2] ↔ (20,10) [U1.2] · 接触引脚 R1.2, U1.2"
+    }
+  ],
+  "rawEventCount": 1,
+  "rawEvents": [
+    {
+      "seq": 1,
+      "time": "2026-09-22T12:18:20.645Z",
+      "eventType": "change",
+      "documentId": null,
+      "lastObservedDocumentId": "SYNTHETIC-EXAMPLE",
+      "props": {
+        "primitiveIds": [
+          "l1"
+        ]
+      },
+      "primitiveIds": [
+        "l1"
+      ]
+    }
+  ],
+  "captureCoverage": {
+    "snapshotSource": "sys_FileManager.getDocumentSource",
+    "nativeEvents": true,
+    "pinResolution": "available",
+    "finalSnapshotComplete": true,
+    "coordinateSystem": "EasyEDA document source (API pin Y negated)",
+    "warnings": [],
+    "limitations": [
+      "记录原理图设计变化；选中、缩放、菜单点击等未改变设计的操作不等于设计事件。",
+      "原生事件只提供类型和图元 ID；快速连续变化可能共享一个详细快照，原始事件仍全部保留。",
+      "引脚/导线接触按源码坐标匹配；交叉线是否电气连接以原生 DRC/网表为准。"
+    ],
+    "lastSuccessfulCapture": "2026-09-22T12:18:20.648Z"
+  },
+  "documents": [
+    {
+      "document": {
+        "uuid": "SYNTHETIC-EXAMPLE",
+        "type": "SCH_PAGE",
+        "name": "Synthetic example; not a participant circuit"
+      },
+      "initialCapturedAt": "2026-09-22T12:18:20.645Z",
+      "finalCapturedAt": "2026-09-22T12:18:20.648Z",
+      "initialSource": "{\"type\":\"DOCHEAD\",\"id\":\"doc\"}||{\"docType\":\"SCH_PAGE\",\"uuid\":\"SYNTHETIC-EXAMPLE\",\"name\":\"Synthetic example; not a participant circuit\"}|\n{\"type\":\"COMPONENT\",\"id\":\"r1\"}||{\"x\":0,\"y\":0}|\n{\"type\":\"ATTR\",\"id\":\"r1-ref\"}||{\"parentId\":\"r1\",\"key\":\"Designator\",\"value\":\"R1\"}|\n{\"type\":\"ATTR\",\"id\":\"r1-value\"}||{\"parentId\":\"r1\",\"key\":\"Value\",\"value\":\"10k\"}|\n{\"type\":\"COMPONENT\",\"id\":\"u1\"}||{\"x\":20,\"y\":0}|\n{\"type\":\"ATTR\",\"id\":\"u1-ref\"}||{\"parentId\":\"u1\",\"key\":\"Designator\",\"value\":\"U1\"}|\n{\"type\":\"WIRE\",\"id\":\"w1\"}||{}|\n{\"type\":\"LINE\",\"id\":\"l1\"}||{\"lineGroup\":\"w1\",\"startX\":0,\"startY\":0,\"endX\":20,\"endY\":0}",
+      "finalSource": "{\"type\":\"DOCHEAD\",\"id\":\"doc\"}||{\"docType\":\"SCH_PAGE\",\"uuid\":\"SYNTHETIC-EXAMPLE\",\"name\":\"Synthetic example; not a participant circuit\"}|\n{\"type\":\"COMPONENT\",\"id\":\"r1\"}||{\"x\":0,\"y\":0}|\n{\"type\":\"ATTR\",\"id\":\"r1-ref\"}||{\"parentId\":\"r1\",\"key\":\"Designator\",\"value\":\"R1\"}|\n{\"type\":\"ATTR\",\"id\":\"r1-value\"}||{\"parentId\":\"r1\",\"key\":\"Value\",\"value\":\"10k\"}|\n{\"type\":\"COMPONENT\",\"id\":\"u1\"}||{\"x\":20,\"y\":0}|\n{\"type\":\"ATTR\",\"id\":\"u1-ref\"}||{\"parentId\":\"u1\",\"key\":\"Designator\",\"value\":\"U1\"}|\n{\"type\":\"WIRE\",\"id\":\"w1\"}||{}|\n{\"type\":\"LINE\",\"id\":\"l1\"}||{\"lineGroup\":\"w1\",\"startX\":0,\"startY\":0,\"endX\":20,\"endY\":10}"
+    }
+  ],
+  "notes": [
+    {
+      "kind": "note",
+      "at": "2026-09-22T12:18:20.649Z",
+      "text": "这根线接回去，R1 的值不要改"
+    }
+  ]
+}

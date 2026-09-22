@@ -1,0 +1,79 @@
+{
+  "kind": "lint",
+  "at": "2026-09-22T12:18:20.649Z",
+  "issues": [
+    {
+      "ruleId": "eda-panel-mirror.0",
+      "index": 0,
+      "severity": "info",
+      "ts": "2026-09-22 00:00:00",
+      "message": "开始设计规则检查",
+      "rawText": "2026-09-22 00:00:00\n开始设计规则检查",
+      "isSummary": false,
+      "targets": [
+        "w1"
+      ],
+      "raw": {
+        "source": "easyeda-panel-mirror",
+        "panel": "#schDrcPrimaryLog",
+        "index": 0
+      }
+    },
+    {
+      "ruleId": "eda-panel-mirror.1",
+      "index": 1,
+      "severity": "warning",
+      "ts": "2026-09-22 00:00:00",
+      "message": "导线 TEST 是游离网络，未连接任何引脚。",
+      "rawText": "2026-09-22 00:00:00\n导线 TEST 是游离网络，未连接任何引脚。",
+      "isSummary": false,
+      "targets": [
+        "w1"
+      ],
+      "raw": {
+        "source": "easyeda-panel-mirror",
+        "panel": "#schDrcPrimaryLog",
+        "index": 1
+      }
+    },
+    {
+      "ruleId": "eda-panel-mirror.2",
+      "index": 2,
+      "severity": "warning",
+      "ts": "2026-09-22 00:00:00",
+      "message": "导线 TEST 是游离网络，未连接任何引脚。",
+      "rawText": "2026-09-22 00:00:00\n导线 TEST 是游离网络，未连接任何引脚。",
+      "isSummary": false,
+      "targets": [
+        "w1"
+      ],
+      "raw": {
+        "source": "easyeda-panel-mirror",
+        "panel": "#schDrcPrimaryLog",
+        "index": 2
+      }
+    },
+    {
+      "ruleId": "eda-panel-mirror.3",
+      "index": 3,
+      "severity": "info",
+      "ts": "2026-09-22 00:00:00",
+      "message": "完成设计规则检查。警告：2",
+      "rawText": "2026-09-22 00:00:00\n完成设计规则检查。警告：2",
+      "isSummary": true,
+      "targets": [],
+      "raw": {
+        "source": "easyeda-panel-mirror",
+        "panel": "#schDrcPrimaryLog",
+        "index": 3
+      }
+    }
+  ],
+  "diag": {
+    "source": "panel-mirror",
+    "complete": true,
+    "copied": 4,
+    "expected": 4
+  },
+  "text": "2026-09-22 00:00:00\n开始设计规则检查\n2026-09-22 00:00:00\n导线 TEST 是游离网络，未连接任何引脚。\n2026-09-22 00:00:00\n导线 TEST 是游离网络，未连接任何引脚。\n2026-09-22 00:00:00\n完成设计规则检查。警告：2"
+}
