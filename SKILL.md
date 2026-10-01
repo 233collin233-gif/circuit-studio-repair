@@ -5,7 +5,9 @@ description: Analyze Circuit Studio Lint, Recorder and Hybrid JSON exports, infe
 
 # Circuit Studio：导出分析与电路修改
 
-将 Circuit Studio 的报告变成有证据、可执行、可复查的局部修改。支持 v1.2.19 的三种实际导出，也可保守读取旧格式。此 skill 由 Agent 执行语义分析；脚本只负责无损解析、格式校验和 Bridge 通信，不包含另一个 LLM 或仅靠关键词猜接线的规则引擎。
+将 Circuit Studio 的报告变成有证据、可执行、可复查的局部修改。支持 v1.2.19 / v1.2.20 的三种实际导出，以及导出结构兼容的 v1.2.21 英文界面版，也可保守读取旧格式。此 skill 由外部 Agent 执行语义分析；脚本只负责无损解析、格式校验和 Bridge 通信，不包含另一个 LLM 或仅靠关键词猜接线的规则引擎。
+
+Circuit Studio 扩展本身不调用模型。Lint 复制用户已经运行的原生 DRC；Recorder 保留可观察编辑和文字备注；Hybrid 在停止录制后运行一次全新 DRC。解释、澄清、通过 Bridge 执行授权修改和修改后的复查由外部 Agent 完成。
 
 ## 调用与交付
 
@@ -76,4 +78,4 @@ node "SKILL_DIR/scripts/report.mjs" compile "export.json" "repair-plan.json" "re
 node "SKILL_DIR/scripts/self-check.mjs"
 ```
 
-`scripts/drc-reader.js` 原样复用 Circuit Studio v1.2.19 的 `linter.js`，保留虚拟列表的全量读取和新检查判据。更新扩展格式后先检查本 skill 的格式说明和解析测试。不要套用旧 `circuit-reviewer` 的七条自定义规则：它与当前面板镜像格式不是同一实现。
+`scripts/drc-reader.js` 原样复用 Circuit Studio v1.2.21 的 `linter.js`，保留虚拟列表的全量读取和新检查判据。更新扩展格式后先检查本 skill 的格式说明和解析测试。不要套用旧 `circuit-reviewer` 的七条自定义规则：它与当前面板镜像格式不是同一实现。

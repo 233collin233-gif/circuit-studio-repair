@@ -1,0 +1,4 @@
+extension/** text eol=lf
+extension/images/* binary
+scripts/drc-reader.js text eol=lf
+releases/*.eext binary

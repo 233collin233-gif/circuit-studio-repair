@@ -2,6 +2,8 @@
 
 依据：Circuit Studio v1.2.19 的 `iframe/app.template.js`、`main.js`、`recorder.js`、`hybrid.js`、`linter.js`。不要将早期规则引擎的 issue schema 或论文旧稿视为当前字段规范。
 
+v1.2.20 与 v1.2.21 延续这些导出字段；v1.2.21 的源码保存在本仓库 `extension/`。英文界面不翻译 DRC 原文、设计名称或用户备注。Lint 的 **Copy DRC** 复制用户已运行的检查；Hybrid 的 **Stop and check** 在录制收尾后请求一次新的检查。
+
 ## Lint
 
 主界面：`{kind:"lint", at, issues, diag, text}`。扩展入口也可能导出较小的 `{kind:"lint", at, issues}`；缺少 `diag` 不证明完整，也不拒绝分析已有证据。

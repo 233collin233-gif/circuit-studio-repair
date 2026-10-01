@@ -11,3 +11,7 @@ backups/
 /execution-result.json
 *.zip
 *.eext
+!releases/circuit-studio_v1.2.21.eext
+extension/build/
+extension/dist/
+extension/english-ui-validation.json

@@ -1,0 +1,47 @@
+{
+  "version": "1.2.21",
+  "baseVersion": "1.2.20",
+  "artifact": "circuit-studio_v1.2.21.eext",
+  "sha256": "963c20b0e73b006edc31c5f998e0b184ee8ce60602ff385c18d1bbecfe686948",
+  "bytes": 56008,
+  "archiveFiles": [
+    "CHANGELOG.md",
+    "dist/index.js",
+    "extension.json",
+    "hybrid.js",
+    "iframe/index.html",
+    "images/banner.png",
+    "images/logo.png",
+    "LICENSE",
+    "linter.js",
+    "README.en.md",
+    "README.md",
+    "recorder.js",
+    "RELEASE-VALIDATION.md"
+  ],
+  "validation": {
+    "drcCases": 12,
+    "recorderCases": 13,
+    "hybridCases": 14,
+    "packagedUiFlows": 4,
+    "layoutCases": 6,
+    "actualCircuitApiCalls": 0,
+    "installedInEditor": false,
+    "sourceDataTranslated": false
+  },
+  "validationRecordedAt": "2026-09-28",
+  "publishedAt": "2026-10-01",
+  "repositoryValidation": {
+    "date": "2026-10-01",
+    "node": "24.19.0",
+    "dependencyInstall": "passed",
+    "build": "passed",
+    "drcRegressionCases": 12,
+    "recorderRegressionCases": 13,
+    "hybridRegressionCases": 14,
+    "repairSkillChecks": 17,
+    "generatedRuntimeMatchesOriginalArchive": true,
+    "sharedDrcReaderMatchesOriginalArchive": true,
+    "liveEditorTestsRerun": false
+  }
+}

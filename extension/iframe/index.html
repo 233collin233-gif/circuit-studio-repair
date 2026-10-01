@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8" />
+	<title>Circuit Studio</title>
+	<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif; background: #1a1a1a; color: #e0e0e0; font-size: 13px; line-height: 1.5; }
+#app { display: flex; flex-direction: column; height: 100vh; }
+
+/* ====== top toolbar ====== */
+.toolbar { flex-wrap: wrap; flex-shrink: 0; display: flex; align-items: center; gap: 8px; padding: 8px 12px; background: #252525; border-bottom: 1px solid #333; }
+.toolbar .brand { font-weight: 700; font-size: 14px; color: #fff; display: flex; align-items: center; gap: 6px; }
+.toolbar .brand .ver { font-weight: 400; color: #888; font-size: 11px; }
+.mode-tabs { display: flex; gap: 2px; background: #1a1a1a; border-radius: 4px; padding: 2px; }
+.mode-tab { padding: 5px 14px; border: none; background: transparent; color: #888; border-radius: 3px; cursor: pointer; font-size: 12px; font-family: inherit; transition: all 0.15s; }
+.mode-tab:hover { background: #3a3a3a; color: #ccc; }
+.mode-tab.active { background: #6366f1; color: #fff; font-weight: 600; }
+.toolbar .spacer { flex: 1; }
+.toolbar .conn { font-size: 11px; color: #666; display: flex; align-items: center; gap: 4px; }
+.toolbar .conn .dot { width: 8px; height: 8px; border-radius: 50%; background: #22c55e; }
+
+/* ====== content ====== */
+.content { flex: 1; overflow-y: auto; padding: 12px; }
+.panel { display: none; }
+.panel.active { display: block; }
+
+/* ====== Lint ====== */
+.lint-summary { display: flex; gap: 12px; margin-bottom: 16px; padding: 12px; background: #252525; border-radius: 8px; border: 1px solid #333; }
+.lint-summary .cell { flex: 1; text-align: center; }
+.lint-summary .cell .n { font-size: 24px; font-weight: 700; line-height: 1.1; }
+.lint-summary .cell .l { color: #888; font-size: 11px; }
+.lint-summary .cell.error .n { color: #ef4444; }
+.lint-summary .cell.warn .n { color: #f59e0b; }
+.lint-summary .cell.ok .n { color: #22c55e; }
+.lint-summary .cell.info .n { color: #6366f1; }
+.lint-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+.btn { padding: 7px 16px; border: none; border-radius: 5px; cursor: pointer; font-size: 13px; font-family: inherit; font-weight: 500; transition: opacity 0.15s; display: inline-flex; align-items: center; gap: 6px; }
+.btn:hover { opacity: 0.85; }
+.btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.btn.primary { background: #6366f1; color: #fff; }
+.btn.danger { background: #ef4444; color: #fff; }
+.btn.success { background: #22c55e; color: #fff; }
+.btn.ghost { background: #3a3a3a; color: #ccc; }
+.lint-rule { padding: 10px 12px; background: #252525; border-radius: 6px; margin-bottom: 6px; border-left: 3px solid transparent; cursor: pointer; transition: all 0.15s; }
+.lint-rule:hover { background: #2d2d2d; }
+.lint-rule.error { border-left-color: #ef4444; }
+.lint-rule.warn { border-left-color: #f59e0b; }
+.lint-rule.ok { border-left-color: #22c55e; }
+.lint-rule .head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+.lint-rule .rule-name { font-weight: 600; font-size: 13px; }
+.lint-rule .sev { font-size: 11px; padding: 2px 8px; border-radius: 10px; font-weight: 600; }
+.lint-rule .sev.error { background: #ef444420; color: #ef4444; }
+.lint-rule .sev.warn { background: #f59e0b20; color: #f59e0b; }
+.lint-rule .sev.ok { background: #22c55e20; color: #22c55e; }
+.lint-rule .msg { color: #b0b0b0; font-size: 12px; }
+.lint-rule .target { font-family: 'Consolas', 'Monaco', monospace; font-size: 11px; color: #888; margin-top: 4px; }
+
+/* ====== Lint log lines (mirrors EasyEDA's bottom-DRC-panel output) ====== */
+.lint-log { background: #1a1a1a; border-radius: 6px; border: 1px solid #333; padding: 10px 12px; font-family: 'Consolas', 'Monaco', monospace; font-size: 12px; line-height: 1.7; max-height: 480px; overflow-y: auto; }
+.lint-log-row { display: flex; gap: 8px; align-items: baseline; padding: 1px 0; }
+.lint-log-row:hover { background: #252525; }
+.lint-log-row[data-sev="warning"] .lint-log-msg,
+.lint-log-row[data-sev="error"]   .lint-log-msg,
+.lint-log-row[data-sev="fatal"]   .lint-log-msg { color: #e0e0e0; }
+.lint-log-ts    { color: #6b7280; white-space: nowrap; }
+.lint-log-label { font-weight: 600; white-space: nowrap; }
+.lint-log-fatal   .lint-log-label { color: #ef4444; }
+.lint-log-error   .lint-log-label { color: #ef4444; }
+.lint-log-warning .lint-log-label { color: #f59e0b; }
+.lint-log-info    .lint-log-label { color: #6366f1; }
+.lint-log-sep     { color: #6b7280; }
+.lint-log-msg     { color: #d0d0d0; flex: 1; word-break: break-word; white-space: pre-wrap; }
+.lint-log-summary { margin-top: 8px; padding-top: 8px; border-top: 1px dashed #333; }
+.event-detail { margin-top: 6px; color: #9ca3af; }
+.event-detail summary { cursor: pointer; font-size: 11px; }
+.event-detail pre { max-height: 280px; overflow: auto; white-space: pre-wrap; word-break: break-word; font-size: 11px; }
+.hybrid-final-result { margin-top: 14px; padding: 12px; border: 1px solid #374151; border-radius: 6px; }
+.capture-status { color: #9ca3af; font-size: 12px; line-height: 1.6; margin: 8px 0 16px; }
+
+/* ====== Lint diag (verbose array shape + console capture raw lines) ====== */
+.lint-diag { background: #1a1a1a; border: 1px dashed #6366f1; border-radius: 6px; padding: 10px 12px; margin-bottom: 12px; font-size: 12px; }
+.lint-diag-head { color: #6366f1; font-weight: 600; margin-bottom: 4px; font-size: 12px; }
+.lint-diag-pre { background: #111; border-radius: 4px; padding: 8px; margin: 0 0 8px; max-height: 240px; overflow: auto; color: #d0d0d0; font-family: 'Consolas', 'Monaco', monospace; font-size: 11px; line-height: 1.5; white-space: pre-wrap; word-break: break-all; }
+.lint-source-banner { padding: 6px 10px; margin-bottom: 8px; background: #1e3a5f; border: 1px solid #3b82f6; border-radius: 4px; color: #93c5fd; font-size: 11px; font-family: 'Consolas', 'Monaco', monospace; }
+
+/* ====== Recorder ====== */
+.rec-status { display: flex; align-items: center; gap: 12px; padding: 14px; background: #252525; border-radius: 8px; border: 1px solid #333; margin-bottom: 12px; }
+.rec-dot { width: 14px; height: 14px; border-radius: 50%; background: #555; flex-shrink: 0; }
+.rec-dot.active { background: #ef4444; animation: pulse 1.5s infinite; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+.rec-status .text { flex: 1; }
+.rec-status .text .label { font-weight: 600; font-size: 14px; }
+.rec-status .text .sub { color: #888; font-size: 12px; margin-top: 2px; }
+.rec-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+
+/* timeline */
+.timeline { background: #252525; border-radius: 8px; border: 1px solid #333; }
+.timeline-header { display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; border-bottom: 1px solid #333; font-size: 12px; color: #888; }
+.timeline-list { max-height: 340px; overflow-y: auto; padding: 8px; }
+.timeline-item { display: flex; gap: 8px; padding: 7px 10px; margin-bottom: 4px; background: #1a1a1a; border-radius: 5px; font-size: 12px; }
+.timeline-item .seq { color: #555; font-family: 'Consolas', 'Monaco', monospace; min-width: 24px; }
+.timeline-item .body { flex: 1; }
+.timeline-item .evt { color: #93c5fd; font-family: 'Consolas', 'Monaco', monospace; font-size: 11px; }
+.timeline-item .meta { color: #888; font-size: 11px; margin-top: 2px; }
+.timeline-item.note { background: #1e3a5f; border: 1px solid #3b82f6; }
+.timeline-item.note .body { color: #dbeafe; }
+.timeline-item.note .evt { color: #60a5fa; }
+.timeline-empty { color: #555; text-align: center; padding: 28px; font-size: 13px; }
+
+/* add note */
+.note-form { display: flex; gap: 6px; margin-top: 8px; padding: 10px; background: #252525; border-radius: 6px; border: 1px solid #333; }
+.note-input { flex: 1; min-width: 0; background: #1a1a1a; border: 1px solid #3a3a3a; border-radius: 4px; padding: 7px 10px; color: #e0e0e0; font-family: inherit; font-size: 12px; }
+.note-input:focus { outline: none; border-color: #6366f1; }
+.note-input::placeholder { color: #555; }
+
+/* ====== Hybrid ====== */
+.hybrid-status { display: flex; gap: 12px; margin-bottom: 12px; }
+.hybrid-card { flex: 1; min-width: 0; overflow-wrap: anywhere; padding: 10px 14px; background: #252525; border-radius: 6px; border: 1px solid #333; }
+.hybrid-card .label { font-size: 11px; color: #888; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+.hybrid-card .value { font-size: 16px; font-weight: 600; }
+.hybrid-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+.tl-item { display: flex; gap: 8px; padding: 7px 10px; margin-bottom: 2px; background: #1a1a1a; border-radius: 5px; font-size: 12px; align-items: center; }
+.tl-item .tl-seq { color: #555; font-family: 'Consolas', 'Monaco', monospace; min-width: 28px; }
+.tl-item .tl-desc { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.tl-item .tl-time { color: #888; font-family: 'Consolas', 'Monaco', monospace; font-size: 11px; }
+.tl-item.note { background: #1e3a5f; border: 1px solid #3b82f6; }
+.tl-item.lint { background: #1a1a2e; border: 1px solid #6366f1; font-weight: 600; }
+.tl-lint-report { margin: 0 0 10px 36px; padding: 8px 10px; background: #1a1a1a; border-left: 2px solid #6366f1; border-radius: 4px; font-family: 'Consolas', 'Monaco', monospace; font-size: 11px; }
+.tl-lint-report .lint-log-row { display: flex; gap: 8px; align-items: baseline; padding: 1px 0; }
+.tl-lint-report .lint-log-label { font-weight: 600; white-space: nowrap; min-width: 40px; }
+.tl-lint-report .lint-log-fatal   .lint-log-label,
+.tl-lint-report .lint-log-error   .lint-log-label { color: #ef4444; }
+.tl-lint-report .lint-log-warning .lint-log-label { color: #f59e0b; }
+.tl-lint-report .lint-log-info    .lint-log-label { color: #6366f1; }
+.tl-lint-report .lint-log-sep     { color: #6b7280; }
+.tl-lint-report .lint-log-msg     { color: #d0d0d0; flex: 1; word-break: break-word; }
+
+/* ====== common ====== */
+.empty-state { text-align: center; padding: 40px 20px; color: #555; }
+.empty-state .ico { font-size: 36px; opacity: 0.3; margin-bottom: 12px; }
+.empty-state .hint { font-size: 12px; margin-top: 6px; color: #444; }
+.divider { height: 1px; background: #333; margin: 14px 0; }
+
+/* ====== statusbar ====== */
+.statusbar { flex-shrink: 0; padding: 5px 12px; background: #1f1f1f; border-top: 1px solid #2d2d2d; font-size: 11px; color: #666; display: flex; gap: 12px; }
+.statusbar span { min-width: 0; overflow-wrap: anywhere; display: flex; align-items: center; gap: 4px; }
+.statusbar .progress-wrap { flex: 1; display: flex; align-items: center; gap: 8px; }
+.progress-bar { flex: 1; height: 4px; background: #2a2a2a; border-radius: 2px; overflow: hidden; max-width: 200px; }
+.progress-bar .fill { height: 100%; background: #6366f1; width: 0%; transition: width 0.2s; }
+	</style>
+</head>
+<body>
+<div id="app">
+
+	<!-- ====== toolbar ====== -->
+	<div class="toolbar">
+		<div class="brand">
+			<span>🔧</span>
+			<span>Circuit Studio</span>
+			<span class="ver" id="brand-version">v1.2.21</span>
+		</div>
+		<div class="mode-tabs" id="mode-tabs">
+			<button class="mode-tab" data-mode="lint">🛡 Lint</button>
+			<button class="mode-tab" data-mode="recorder">🎬 Recorder</button>
+			<button class="mode-tab" data-mode="hybrid">⚡ Hybrid</button>
+		</div>
+		<div class="spacer"></div>
+		<div class="conn"><span class="dot"></span><span id="conn-status">Extension ready</span></div>
+	</div>
+
+	<!-- ====== Lint panel ====== -->
+	<div class="content">
+		<p class="capture-status">DRC output, design names, and notes retain their original language.</p>
+		<div class="panel active" id="panel-lint">
+			<div class="lint-summary">
+				<div class="cell error"><div class="n" id="sum-error">0</div><div class="l">Errors</div></div>
+				<div class="cell warn"><div class="n" id="sum-warn">0</div><div class="l">Warnings</div></div>
+				<div class="cell info"><div class="n" id="sum-info">0</div><div class="l">Info</div></div>
+				<div class="cell ok" hidden><div class="n" id="sum-pass">0</div><div class="l">Rules passed</div></div>
+			</div>
+			<div class="lint-actions">
+				<button class="btn primary" id="btn-lint-run">▶ Copy DRC</button>
+				<button class="btn ghost" id="btn-lint-export" disabled>📥 Export JSON report</button>
+			</div>
+			<div id="lint-list"></div>
+		</div>
+
+		<!-- ====== Recorder panel ====== -->
+		<div class="panel" id="panel-recorder">
+			<div class="rec-status">
+				<div class="rec-dot" id="rec-dot"></div>
+				<div class="text">
+					<div class="label" id="rec-label">Idle</div>
+					<div class="sub" id="rec-sub">Record schematic edits, wire endpoints, and contact changes. Expand an entry to compare before and after.</div>
+				</div>
+			</div>
+			<div class="rec-actions">
+				<button class="btn danger" id="btn-rec-start">● Start recording</button>
+				<button class="btn ghost" id="btn-rec-stop" disabled>■ Stop and save</button>
+				<button class="btn ghost" id="btn-rec-clear" disabled>🗑 Clear</button>
+				<button class="btn ghost" id="btn-rec-export" disabled>📥 Export recording</button>
+			</div>
+			<p class="capture-status" id="rec-coverage" aria-live="polite">Capture coverage and pin contact detection appear after recording starts.</p>
+
+			<div class="timeline">
+				<div class="timeline-header">
+					<span>📋 Timeline</span>
+					<span id="rec-count">0 entries</span>
+				</div>
+				<div class="timeline-list" id="timeline-list"></div>
+			</div>
+
+			<div class="note-form">
+				<input class="note-input" id="note-input" type="text" placeholder="Type a note to insert into the timeline (e.g. &quot;Just changed the resistor value&quot;)" />
+				<button class="btn primary" id="btn-add-note">+ Insert note</button>
+			</div>
+		</div>
+
+
+
+		<!-- ====== Hybrid panel ====== -->
+		<div class="panel" id="panel-hybrid">
+			<div class="hybrid-status">
+				<div class="hybrid-card">
+					<div class="label">Recording state</div>
+					<div class="value" id="hybrid-rec-state">Idle</div>
+				</div>
+				<div class="hybrid-card">
+					<div class="label">Latest error count</div>
+					<div class="value" id="hybrid-err-count">0</div>
+				</div>
+				<div class="hybrid-card">
+					<div class="label">Latest warning count</div>
+					<div class="value" id="hybrid-warn-count">0</div>
+				</div>
+				<div class="hybrid-card">
+					<div class="label">Notes count</div>
+					<div class="value" id="hybrid-note-count">0</div>
+				</div>
+			</div>
+			<div class="hybrid-actions">
+		<button class="btn danger" id="btn-hybrid-start">● Start recording</button>
+		<button class="btn primary" id="btn-hybrid-stop" disabled>■ Stop and check</button>
+		<button class="btn ghost" id="btn-hybrid-clear" disabled>🗑 Clear</button>
+		<button class="btn ghost" id="btn-hybrid-export" disabled>📥 Export recording + DRC</button>
+			</div>
+			<p class="capture-status" id="hybrid-coverage" aria-live="polite">Stopping saves the final edits and runs one fresh DRC check.</p>
+
+			<div class="timeline">
+				<div class="timeline-header">
+					<span>📋 Recording + fresh DRC log</span>
+					<span id="hybrid-count">0 entries</span>
+				</div>
+				<div class="timeline-list" id="hybrid-timeline"></div>
+			</div>
+
+			<div class="note-form">
+				<input class="note-input" id="hybrid-note-input" type="text" placeholder="Type a note to insert into the timeline" />
+				<button class="btn primary" id="btn-hybrid-note">+ Insert note</button>
+			</div>
+		</div>
+	</div>
+
+	<!-- ====== statusbar ====== -->
+	<div class="statusbar">
+		<span id="status-mode">Lint</span>
+		<span class="progress-wrap"><div class="progress-bar"><div class="fill" id="status-progress"></div></div><span id="status-label">Ready</span></span>
+	</div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>

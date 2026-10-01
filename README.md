@@ -2,7 +2,23 @@
 
 分析 Circuit Studio 的 **Lint、Recorder、Hybrid** 导出文件，把 DRC、备注和录制变化整理成有证据的修改方案与 prompt，再由 Agent 通过 EasyEDA Bridge 修改原理图并复查。
 
-支持 Circuit Studio v1.2.19。脚本需要 **Node.js 18+**，没有 npm 依赖。语义分析由调用 skill 的 Agent 完成；本仓库不包含模型、模型账号或 EasyEDA Bridge 安装包。
+支持 Circuit Studio v1.2.19 / v1.2.20，以及导出结构兼容的 **v1.2.21 英文界面版**。修复 skill 的脚本需要 **Node.js 18+**，没有 npm 依赖。语义分析由调用 skill 的外部 Agent 完成；本仓库不包含模型、模型账号或 EasyEDA Bridge 安装包。
+
+## Circuit Studio v1.2.21 扩展
+
+- [下载 v1.2.21 安装包](https://github.com/233collin233-gif/circuit-studio-repair/raw/main/releases/circuit-studio_v1.2.21.eext)
+- [扩展源码与构建说明](extension/README.md)
+- [本次版本说明](releases/v1.2.21.md) · [SHA-256 校验值](releases/SHA256SUMS.txt)
+
+在 EasyEDA 扩展管理器中导入 `.eext`，关闭旧面板，再打开 **Circuit Studio → Circuit Studio Panel**，确认标题显示 **v1.2.21**。
+
+| 模式 | v1.2.21 操作顺序 |
+| --- | --- |
+| Lint | 用户先在 EasyEDA 运行原生 DRC → **Copy DRC** → **Export JSON report**。复制按钮不运行新的检查。 |
+| Recorder | **Start recording** → 编辑并按需 **Insert note** → **Stop and save** → **Export recording**。 |
+| Hybrid | **Start recording** → 编辑并按需 **Insert note** → **Stop and check** → 等待一次全新原生 DRC → **Export recording + DRC**。 |
+
+扩展只采集、组织和导出 evidence，不调用模型。意图解释、澄清、通过 Bridge 执行修改及修改后的复查属于 external Agent 工作流。Hybrid 的结束检查只覆盖结束时的活动工作表，不锁定画布；用户应等待检查完成再继续编辑。英文界面保留原生 DRC、设计名称和用户备注的原始语言。
 
 ## 安装
 
@@ -96,11 +112,13 @@ Bridge 默认发现本机 `127.0.0.1:49620–49629` 的 `easyeda-bridge` 服务�
 
 真实导出可能包含完整图纸源码。实验记录、参与者资料和 Bridge 凭据应保存在仓库外；公开问题报告请使用脱敏样例。本仓库只提供合成演示数据。
 
-许可见 [LICENSE](LICENSE)。`scripts/drc-reader.js` 复用 Circuit Studio v1.2.19 的 DRC 读取实现，保留其 MIT 许可与作者信息。
+许可见 [LICENSE](LICENSE)。`scripts/drc-reader.js` 与 `extension/linter.js` 及原始 v1.2.21 安装包中的 DRC 读取实现一致，保留其 MIT 许可与作者信息。
 
 ## English quick start
 
 Copy this folder to `~/.codex/skills/circuit-studio-repair`, install Node.js 18+, and attach a Circuit Studio export to an agent with local file and tool access. Connect the supplied EasyEDA Bridge for actual edits.
+
+The v1.2.21 extension package is in [`releases/`](releases/v1.2.21.md), with source and build instructions in [`extension/`](extension/README.md). Lint requires a user-run native DRC before copying; Hybrid runs one fresh check after recording stops. The extension itself calls no model. The repair scripts remain dependency-free; only building the extension requires its two development dependencies.
 
 ```text
 Use $circuit-studio-repair to analyze this export, infer the intended circuit
