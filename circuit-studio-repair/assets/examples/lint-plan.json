@@ -1,0 +1,47 @@
+{
+  "schema": "circuit-studio-repair-plan/v1",
+  "inputSha256": "11f711e11566232ffca101b2f5dbdaba1d904e5c669e507933fa45753a3333ff",
+  "inputMode": "lint",
+  "context": {
+    "userRequest": "Analyze this synthetic example only. Do not edit a real schematic.",
+    "executionScope": "analysis-only",
+    "preferenceIds": []
+  },
+  "goal": "Inspect the repeated native warning and resolve its actual target.",
+  "preserve": [
+    "Never apply synthetic identifiers to a real schematic.",
+    "Keep unrelated objects and existing properties unchanged."
+  ],
+  "steps": [
+    {
+      "id": "inspect-1",
+      "operation": "inspect",
+      "documentId": null,
+      "targets": [
+        {
+          "logTarget": "w1"
+        }
+      ],
+      "desiredState": {
+        "resolve": "Determine whether the warning refers to an unwanted fragment or a required connection."
+      },
+      "preconditions": [
+        "Only use the matching synthetic mock document for this example.",
+        "Resolve current object identities and compare the recorded final state with the live state."
+      ],
+      "evidence": [
+        "D2",
+        "D3"
+      ],
+      "intentBasis": "inferred",
+      "confidence": "low",
+      "disposition": "inspect",
+      "reason": "Two equal warning messages remain two native log rows; they do not supply a complete repair instruction.",
+      "verify": [
+        "Read back the actual target and required connections.",
+        "Check the user goal and preserved conditions, then run and retain fresh DRC."
+      ]
+    }
+  ],
+  "unresolved": []
+}

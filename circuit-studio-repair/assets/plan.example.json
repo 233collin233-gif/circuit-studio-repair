@@ -1,0 +1,36 @@
+{
+  "schema": "circuit-studio-repair-plan/v1",
+  "inputSha256": "replace-with-normalizer-output",
+  "inputMode": "recorder",
+  "context": {
+    "userRequest": "Interpret the recorded note and restore its intended connection while preserving unrelated edits.",
+    "executionScope": "authorized-repair",
+    "preferenceIds": []
+  },
+  "goal": "Identify the connection described by the note and preserve other design changes",
+  "preserve": ["Keep component properties and unrelated nets unchanged"],
+  "assumptions": ["This template has not yet been matched to a real schematic"],
+  "steps": [
+    {
+      "id": "fix-1",
+      "operation": "inspect",
+      "documentId": null,
+      "targets": [],
+      "desiredState": {
+        "resolve": "Use live state and before/after evidence to identify the wire and intended endpoint"
+      },
+      "preconditions": ["Match the current worksheet to this report"],
+      "evidence": ["N1", "E1"],
+      "intentBasis": "inferred",
+      "confidence": "medium",
+      "disposition": "inspect",
+      "reason": "The note requires current connectivity evidence to distinguish plausible interpretations",
+      "alternatives": [
+        "Restore the endpoint captured before the edit",
+        "Keep the recorded endpoint if the note describes a completed change"
+      ],
+      "verify": ["Identify one supported endpoint or ask for the remaining decisive choice"]
+    }
+  ],
+  "unresolved": []
+}

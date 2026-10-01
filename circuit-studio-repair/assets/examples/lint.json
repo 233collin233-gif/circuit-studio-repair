@@ -1,0 +1,78 @@
+{
+  "kind": "lint",
+  "at": "2026-10-01T09:00:00.004Z",
+  "issues": [
+    {
+      "ruleId": "eda-panel-mirror.0",
+      "index": 0,
+      "severity": "info",
+      "ts": "2026-10-01 09:00:00",
+      "message": "Start Design Rule Checking. Synthetic example only (SYNTHETIC-EXAMPLE).",
+      "rawText": "2026-10-01 09:00:00\nStart Design Rule Checking. Synthetic example only (SYNTHETIC-EXAMPLE).",
+      "isSummary": false,
+      "targets": [],
+      "raw": {
+        "source": "easyeda-panel-mirror",
+        "panel": "#schDrcPrimaryLog",
+        "index": 0
+      }
+    },
+    {
+      "ruleId": "eda-panel-mirror.1",
+      "index": 1,
+      "severity": "warning",
+      "ts": "2026-10-01 09:00:00",
+      "message": "Wire TEST is an isolated net and is not connected to any pin.",
+      "rawText": "2026-10-01 09:00:00\nWire TEST is an isolated net and is not connected to any pin.",
+      "isSummary": false,
+      "targets": [
+        "w1"
+      ],
+      "raw": {
+        "source": "easyeda-panel-mirror",
+        "panel": "#schDrcPrimaryLog",
+        "index": 1
+      }
+    },
+    {
+      "ruleId": "eda-panel-mirror.2",
+      "index": 2,
+      "severity": "warning",
+      "ts": "2026-10-01 09:00:00",
+      "message": "Wire TEST is an isolated net and is not connected to any pin.",
+      "rawText": "2026-10-01 09:00:00\nWire TEST is an isolated net and is not connected to any pin.",
+      "isSummary": false,
+      "targets": [
+        "w1"
+      ],
+      "raw": {
+        "source": "easyeda-panel-mirror",
+        "panel": "#schDrcPrimaryLog",
+        "index": 2
+      }
+    },
+    {
+      "ruleId": "eda-panel-mirror.3",
+      "index": 3,
+      "severity": "info",
+      "ts": "2026-10-01 09:00:00",
+      "message": "Finish Design Rule Checking. Warnings: 2",
+      "rawText": "2026-10-01 09:00:00\nFinish Design Rule Checking. Warnings: 2",
+      "isSummary": true,
+      "targets": [],
+      "raw": {
+        "source": "easyeda-panel-mirror",
+        "panel": "#schDrcPrimaryLog",
+        "index": 3
+      }
+    }
+  ],
+  "diag": {
+    "source": "panel-mirror",
+    "complete": true,
+    "copied": 4,
+    "expected": 4,
+    "rerun": false
+  },
+  "text": "2026-10-01 09:00:00\nStart Design Rule Checking. Synthetic example only (SYNTHETIC-EXAMPLE).\n2026-10-01 09:00:00\nWire TEST is an isolated net and is not connected to any pin.\n2026-10-01 09:00:00\nWire TEST is an isolated net and is not connected to any pin.\n2026-10-01 09:00:00\nFinish Design Rule Checking. Warnings: 2"
+}

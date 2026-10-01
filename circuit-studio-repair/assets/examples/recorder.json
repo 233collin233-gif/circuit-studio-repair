@@ -1,0 +1,707 @@
+{
+  "kind": "recorder",
+  "schemaVersion": 2,
+  "sessionId": "sess-1790845260000-4i",
+  "sessionStart": "2026-10-01T09:01:00.001Z",
+  "sessionEnd": "2026-10-01T09:01:00.016Z",
+  "exportedAt": "2026-10-01T09:01:00.018Z",
+  "recording": false,
+  "document": {
+    "uuid": "SYNTHETIC-EXAMPLE",
+    "type": "SCH_PAGE",
+    "name": "Synthetic example; not a participant circuit"
+  },
+  "eventCount": 1,
+  "events": [
+    {
+      "seq": 1,
+      "time": "2026-10-01T09:01:00.007Z",
+      "scope": "sch",
+      "source": "document-source",
+      "documentId": "SYNTHETIC-EXAMPLE",
+      "eventType": "wire.modify",
+      "primitiveId": "w1",
+      "primitiveType": "WIRE",
+      "line": [
+        {
+          "id": "l1",
+          "startX": 0,
+          "startY": 0,
+          "endX": 20,
+          "endY": 10
+        }
+      ],
+      "before": {
+        "id": "w1",
+        "primitiveType": "WIRE",
+        "type": "wire",
+        "attributes": {},
+        "line": [
+          {
+            "id": "l1",
+            "startX": 0,
+            "startY": 0,
+            "endX": 20,
+            "endY": 0
+          }
+        ],
+        "records": [
+          {
+            "id": "l1",
+            "type": "LINE",
+            "body": {
+              "lineGroup": "w1",
+              "startX": 0,
+              "startY": 0,
+              "endX": 20,
+              "endY": 0
+            }
+          },
+          {
+            "id": "w1",
+            "type": "WIRE",
+            "body": {}
+          }
+        ],
+        "connections": {
+          "basis": "coordinate-contact",
+          "pinResolution": "available",
+          "segmentContacts": [
+            {
+              "x": 0,
+              "y": 0,
+              "pin": {
+                "primitiveId": "r1p2",
+                "componentId": "r1",
+                "designator": "R1",
+                "componentName": "Input resistor",
+                "number": "2",
+                "name": "2",
+                "x": 0,
+                "y": 0,
+                "noConnected": false
+              },
+              "segmentIds": [
+                "l1"
+              ]
+            },
+            {
+              "x": 20,
+              "y": 0,
+              "pin": {
+                "primitiveId": "u1pin",
+                "componentId": "u1",
+                "designator": "U1",
+                "componentName": "Amplifier",
+                "number": "1",
+                "name": "IN",
+                "x": 20,
+                "y": 0,
+                "noConnected": false
+              },
+              "segmentIds": [
+                "l1"
+              ]
+            }
+          ],
+          "endpoints": [
+            {
+              "x": 0,
+              "y": 0,
+              "pins": [
+                {
+                  "primitiveId": "r1p2",
+                  "componentId": "r1",
+                  "designator": "R1",
+                  "componentName": "Input resistor",
+                  "number": "2",
+                  "name": "2",
+                  "x": 0,
+                  "y": 0,
+                  "noConnected": false
+                }
+              ],
+              "wireIds": []
+            },
+            {
+              "x": 20,
+              "y": 0,
+              "pins": [
+                {
+                  "primitiveId": "u1pin",
+                  "componentId": "u1",
+                  "designator": "U1",
+                  "componentName": "Amplifier",
+                  "number": "1",
+                  "name": "IN",
+                  "x": 20,
+                  "y": 0,
+                  "noConnected": false
+                }
+              ],
+              "wireIds": []
+            }
+          ]
+        }
+      },
+      "after": {
+        "id": "w1",
+        "primitiveType": "WIRE",
+        "type": "wire",
+        "attributes": {},
+        "line": [
+          {
+            "id": "l1",
+            "startX": 0,
+            "startY": 0,
+            "endX": 20,
+            "endY": 10
+          }
+        ],
+        "records": [
+          {
+            "id": "l1",
+            "type": "LINE",
+            "body": {
+              "lineGroup": "w1",
+              "startX": 0,
+              "startY": 0,
+              "endX": 20,
+              "endY": 10
+            }
+          },
+          {
+            "id": "w1",
+            "type": "WIRE",
+            "body": {}
+          }
+        ],
+        "connections": {
+          "basis": "coordinate-contact",
+          "pinResolution": "available",
+          "segmentContacts": [
+            {
+              "x": 0,
+              "y": 0,
+              "pin": {
+                "primitiveId": "r1p2",
+                "componentId": "r1",
+                "designator": "R1",
+                "componentName": "Input resistor",
+                "number": "2",
+                "name": "2",
+                "x": 0,
+                "y": 0,
+                "noConnected": false
+              },
+              "segmentIds": [
+                "l1"
+              ]
+            },
+            {
+              "x": 20,
+              "y": 10,
+              "pin": {
+                "primitiveId": "u1pout",
+                "componentId": "u1",
+                "designator": "U1",
+                "componentName": "Amplifier",
+                "number": "2",
+                "name": "OUT",
+                "x": 20,
+                "y": 10,
+                "noConnected": false
+              },
+              "segmentIds": [
+                "l1"
+              ]
+            }
+          ],
+          "endpoints": [
+            {
+              "x": 0,
+              "y": 0,
+              "pins": [
+                {
+                  "primitiveId": "r1p2",
+                  "componentId": "r1",
+                  "designator": "R1",
+                  "componentName": "Input resistor",
+                  "number": "2",
+                  "name": "2",
+                  "x": 0,
+                  "y": 0,
+                  "noConnected": false
+                }
+              ],
+              "wireIds": []
+            },
+            {
+              "x": 20,
+              "y": 10,
+              "pins": [
+                {
+                  "primitiveId": "u1pout",
+                  "componentId": "u1",
+                  "designator": "U1",
+                  "componentName": "Amplifier",
+                  "number": "2",
+                  "name": "OUT",
+                  "x": 20,
+                  "y": 10,
+                  "noConnected": false
+                }
+              ],
+              "wireIds": []
+            }
+          ]
+        }
+      },
+      "_changes": {
+        "line": {
+          "from": [
+            {
+              "id": "l1",
+              "startX": 0,
+              "startY": 0,
+              "endX": 20,
+              "endY": 0
+            }
+          ],
+          "to": [
+            {
+              "id": "l1",
+              "startX": 0,
+              "startY": 0,
+              "endX": 20,
+              "endY": 10
+            }
+          ],
+          "fromExists": true,
+          "toExists": true
+        },
+        "records": {
+          "from": [
+            {
+              "id": "l1",
+              "type": "LINE",
+              "body": {
+                "lineGroup": "w1",
+                "startX": 0,
+                "startY": 0,
+                "endX": 20,
+                "endY": 0
+              }
+            },
+            {
+              "id": "w1",
+              "type": "WIRE",
+              "body": {}
+            }
+          ],
+          "to": [
+            {
+              "id": "l1",
+              "type": "LINE",
+              "body": {
+                "lineGroup": "w1",
+                "startX": 0,
+                "startY": 0,
+                "endX": 20,
+                "endY": 10
+              }
+            },
+            {
+              "id": "w1",
+              "type": "WIRE",
+              "body": {}
+            }
+          ],
+          "fromExists": true,
+          "toExists": true
+        },
+        "connections.segmentContacts": {
+          "from": [
+            {
+              "x": 0,
+              "y": 0,
+              "pin": {
+                "primitiveId": "r1p2",
+                "componentId": "r1",
+                "designator": "R1",
+                "componentName": "Input resistor",
+                "number": "2",
+                "name": "2",
+                "x": 0,
+                "y": 0,
+                "noConnected": false
+              },
+              "segmentIds": [
+                "l1"
+              ]
+            },
+            {
+              "x": 20,
+              "y": 0,
+              "pin": {
+                "primitiveId": "u1pin",
+                "componentId": "u1",
+                "designator": "U1",
+                "componentName": "Amplifier",
+                "number": "1",
+                "name": "IN",
+                "x": 20,
+                "y": 0,
+                "noConnected": false
+              },
+              "segmentIds": [
+                "l1"
+              ]
+            }
+          ],
+          "to": [
+            {
+              "x": 0,
+              "y": 0,
+              "pin": {
+                "primitiveId": "r1p2",
+                "componentId": "r1",
+                "designator": "R1",
+                "componentName": "Input resistor",
+                "number": "2",
+                "name": "2",
+                "x": 0,
+                "y": 0,
+                "noConnected": false
+              },
+              "segmentIds": [
+                "l1"
+              ]
+            },
+            {
+              "x": 20,
+              "y": 10,
+              "pin": {
+                "primitiveId": "u1pout",
+                "componentId": "u1",
+                "designator": "U1",
+                "componentName": "Amplifier",
+                "number": "2",
+                "name": "OUT",
+                "x": 20,
+                "y": 10,
+                "noConnected": false
+              },
+              "segmentIds": [
+                "l1"
+              ]
+            }
+          ],
+          "fromExists": true,
+          "toExists": true
+        },
+        "connections.endpoints": {
+          "from": [
+            {
+              "x": 0,
+              "y": 0,
+              "pins": [
+                {
+                  "primitiveId": "r1p2",
+                  "componentId": "r1",
+                  "designator": "R1",
+                  "componentName": "Input resistor",
+                  "number": "2",
+                  "name": "2",
+                  "x": 0,
+                  "y": 0,
+                  "noConnected": false
+                }
+              ],
+              "wireIds": []
+            },
+            {
+              "x": 20,
+              "y": 0,
+              "pins": [
+                {
+                  "primitiveId": "u1pin",
+                  "componentId": "u1",
+                  "designator": "U1",
+                  "componentName": "Amplifier",
+                  "number": "1",
+                  "name": "IN",
+                  "x": 20,
+                  "y": 0,
+                  "noConnected": false
+                }
+              ],
+              "wireIds": []
+            }
+          ],
+          "to": [
+            {
+              "x": 0,
+              "y": 0,
+              "pins": [
+                {
+                  "primitiveId": "r1p2",
+                  "componentId": "r1",
+                  "designator": "R1",
+                  "componentName": "Input resistor",
+                  "number": "2",
+                  "name": "2",
+                  "x": 0,
+                  "y": 0,
+                  "noConnected": false
+                }
+              ],
+              "wireIds": []
+            },
+            {
+              "x": 20,
+              "y": 10,
+              "pins": [
+                {
+                  "primitiveId": "u1pout",
+                  "componentId": "u1",
+                  "designator": "U1",
+                  "componentName": "Amplifier",
+                  "number": "2",
+                  "name": "OUT",
+                  "x": 20,
+                  "y": 10,
+                  "noConnected": false
+                }
+              ],
+              "wireIds": []
+            }
+          ],
+          "fromExists": true,
+          "toExists": true
+        }
+      },
+      "connections": {
+        "before": {
+          "basis": "coordinate-contact",
+          "pinResolution": "available",
+          "segmentContacts": [
+            {
+              "x": 0,
+              "y": 0,
+              "pin": {
+                "primitiveId": "r1p2",
+                "componentId": "r1",
+                "designator": "R1",
+                "componentName": "Input resistor",
+                "number": "2",
+                "name": "2",
+                "x": 0,
+                "y": 0,
+                "noConnected": false
+              },
+              "segmentIds": [
+                "l1"
+              ]
+            },
+            {
+              "x": 20,
+              "y": 0,
+              "pin": {
+                "primitiveId": "u1pin",
+                "componentId": "u1",
+                "designator": "U1",
+                "componentName": "Amplifier",
+                "number": "1",
+                "name": "IN",
+                "x": 20,
+                "y": 0,
+                "noConnected": false
+              },
+              "segmentIds": [
+                "l1"
+              ]
+            }
+          ],
+          "endpoints": [
+            {
+              "x": 0,
+              "y": 0,
+              "pins": [
+                {
+                  "primitiveId": "r1p2",
+                  "componentId": "r1",
+                  "designator": "R1",
+                  "componentName": "Input resistor",
+                  "number": "2",
+                  "name": "2",
+                  "x": 0,
+                  "y": 0,
+                  "noConnected": false
+                }
+              ],
+              "wireIds": []
+            },
+            {
+              "x": 20,
+              "y": 0,
+              "pins": [
+                {
+                  "primitiveId": "u1pin",
+                  "componentId": "u1",
+                  "designator": "U1",
+                  "componentName": "Amplifier",
+                  "number": "1",
+                  "name": "IN",
+                  "x": 20,
+                  "y": 0,
+                  "noConnected": false
+                }
+              ],
+              "wireIds": []
+            }
+          ]
+        },
+        "after": {
+          "basis": "coordinate-contact",
+          "pinResolution": "available",
+          "segmentContacts": [
+            {
+              "x": 0,
+              "y": 0,
+              "pin": {
+                "primitiveId": "r1p2",
+                "componentId": "r1",
+                "designator": "R1",
+                "componentName": "Input resistor",
+                "number": "2",
+                "name": "2",
+                "x": 0,
+                "y": 0,
+                "noConnected": false
+              },
+              "segmentIds": [
+                "l1"
+              ]
+            },
+            {
+              "x": 20,
+              "y": 10,
+              "pin": {
+                "primitiveId": "u1pout",
+                "componentId": "u1",
+                "designator": "U1",
+                "componentName": "Amplifier",
+                "number": "2",
+                "name": "OUT",
+                "x": 20,
+                "y": 10,
+                "noConnected": false
+              },
+              "segmentIds": [
+                "l1"
+              ]
+            }
+          ],
+          "endpoints": [
+            {
+              "x": 0,
+              "y": 0,
+              "pins": [
+                {
+                  "primitiveId": "r1p2",
+                  "componentId": "r1",
+                  "designator": "R1",
+                  "componentName": "Input resistor",
+                  "number": "2",
+                  "name": "2",
+                  "x": 0,
+                  "y": 0,
+                  "noConnected": false
+                }
+              ],
+              "wireIds": []
+            },
+            {
+              "x": 20,
+              "y": 10,
+              "pins": [
+                {
+                  "primitiveId": "u1pout",
+                  "componentId": "u1",
+                  "designator": "U1",
+                  "componentName": "Amplifier",
+                  "number": "2",
+                  "name": "OUT",
+                  "x": 20,
+                  "y": 10,
+                  "noConnected": false
+                }
+              ],
+              "wireIds": []
+            }
+          ]
+        }
+      },
+      "nativeEventSeqs": [
+        1
+      ],
+      "_desc": "Modify WIRE w1 · (0,0) [R1.2] ↔ (20,0) [U1.1] → (0,0) [R1.2] ↔ (20,10) [U1.2] · Pin contacts: R1.2, U1.2"
+    }
+  ],
+  "rawEventCount": 1,
+  "rawEvents": [
+    {
+      "seq": 1,
+      "time": "2026-10-01T09:01:00.005Z",
+      "eventType": "modify",
+      "documentId": null,
+      "lastObservedDocumentId": "SYNTHETIC-EXAMPLE",
+      "props": {
+        "primitiveIds": [
+          "w1",
+          "l1"
+        ]
+      },
+      "primitiveIds": [
+        "w1",
+        "l1"
+      ]
+    }
+  ],
+  "captureCoverage": {
+    "snapshotSource": "sys_FileManager.getDocumentSource",
+    "nativeEvents": true,
+    "pinResolution": "available",
+    "finalSnapshotComplete": true,
+    "coordinateSystem": "EasyEDA document source (API pin Y negated)",
+    "warnings": [],
+    "limitations": [
+      "Records schematic design changes. Selection, zoom, and menu clicks that do not change the design are not design events.",
+      "Native events provide only the event type and primitive IDs. Rapid edits may share a detailed snapshot; all received native events are retained.",
+      "Pin and wire contacts are matched by source coordinates. Use native DRC and the netlist to verify electrical connectivity at crossings."
+    ],
+    "lastSuccessfulCapture": "2026-10-01T09:01:00.014Z"
+  },
+  "documents": [
+    {
+      "document": {
+        "uuid": "SYNTHETIC-EXAMPLE",
+        "type": "SCH_PAGE",
+        "name": "Synthetic example; not a participant circuit"
+      },
+      "initialCapturedAt": "2026-10-01T09:01:00.002Z",
+      "finalCapturedAt": "2026-10-01T09:01:00.014Z",
+      "initialSource": "{\"type\":\"DOCHEAD\",\"id\":\"doc\"}||{\"docType\":\"SCH_PAGE\",\"uuid\":\"SYNTHETIC-EXAMPLE\",\"name\":\"Synthetic example; not a participant circuit\",\"updateTime\":1}|\n{\"type\":\"COMPONENT\",\"id\":\"r1\"}||{\"x\":0,\"y\":0,\"rotation\":0,\"isMirror\":false}|\n{\"type\":\"ATTR\",\"id\":\"r1-ref\"}||{\"parentId\":\"r1\",\"key\":\"Designator\",\"value\":\"R1\"}|\n{\"type\":\"ATTR\",\"id\":\"r1-value\"}||{\"parentId\":\"r1\",\"key\":\"Value\",\"value\":\"10k\"}|\n{\"type\":\"ATTR\",\"id\":\"r1-name\"}||{\"parentId\":\"r1\",\"key\":\"Name\",\"value\":\"Input resistor\"}|\n{\"type\":\"COMPONENT\",\"id\":\"u1\"}||{\"x\":20,\"y\":0,\"rotation\":0,\"isMirror\":false}|\n{\"type\":\"ATTR\",\"id\":\"u1-ref\"}||{\"parentId\":\"u1\",\"key\":\"Designator\",\"value\":\"U1\"}|\n{\"type\":\"ATTR\",\"id\":\"u1-name\"}||{\"parentId\":\"u1\",\"key\":\"Name\",\"value\":\"Amplifier\"}|\n{\"type\":\"WIRE\",\"id\":\"w1\"}||{}|\n{\"type\":\"LINE\",\"id\":\"l1\"}||{\"lineGroup\":\"w1\",\"startX\":0,\"startY\":0,\"endX\":20,\"endY\":0}",
+      "finalSource": "{\"type\":\"DOCHEAD\",\"id\":\"doc\"}||{\"docType\":\"SCH_PAGE\",\"uuid\":\"SYNTHETIC-EXAMPLE\",\"name\":\"Synthetic example; not a participant circuit\",\"updateTime\":5}|\n{\"type\":\"COMPONENT\",\"id\":\"r1\"}||{\"x\":0,\"y\":0,\"rotation\":0,\"isMirror\":false}|\n{\"type\":\"ATTR\",\"id\":\"r1-ref\"}||{\"parentId\":\"r1\",\"key\":\"Designator\",\"value\":\"R1\"}|\n{\"type\":\"ATTR\",\"id\":\"r1-value\"}||{\"parentId\":\"r1\",\"key\":\"Value\",\"value\":\"10k\"}|\n{\"type\":\"ATTR\",\"id\":\"r1-name\"}||{\"parentId\":\"r1\",\"key\":\"Name\",\"value\":\"Input resistor\"}|\n{\"type\":\"COMPONENT\",\"id\":\"u1\"}||{\"x\":20,\"y\":0,\"rotation\":0,\"isMirror\":false}|\n{\"type\":\"ATTR\",\"id\":\"u1-ref\"}||{\"parentId\":\"u1\",\"key\":\"Designator\",\"value\":\"U1\"}|\n{\"type\":\"ATTR\",\"id\":\"u1-name\"}||{\"parentId\":\"u1\",\"key\":\"Name\",\"value\":\"Amplifier\"}|\n{\"type\":\"WIRE\",\"id\":\"w1\"}||{}|\n{\"type\":\"LINE\",\"id\":\"l1\"}||{\"lineGroup\":\"w1\",\"startX\":0,\"startY\":0,\"endX\":20,\"endY\":10}"
+    }
+  ],
+  "notes": [
+    {
+      "seq": 2,
+      "at": "2026-10-01T09:01:00.011Z",
+      "kind": "note",
+      "text": "Connect this wire back to the original input; keep the rest unchanged."
+    }
+  ]
+}

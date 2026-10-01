@@ -1,0 +1,57 @@
+{
+  "schema": "circuit-studio-repair-plan/v1",
+  "inputSha256": "0e41ba9526e0a9ba9f8663ee8cc63c79c3504da2685d0c1f9341c6980befd421",
+  "inputMode": "recorder",
+  "context": {
+    "userRequest": "Analyze this synthetic example only. Do not edit a real schematic.",
+    "executionScope": "analysis-only",
+    "preferenceIds": []
+  },
+  "goal": "Inspect the candidate return of w1 to the original input.",
+  "preserve": [
+    "Never apply synthetic identifiers to a real schematic.",
+    "Keep unrelated objects and existing properties unchanged."
+  ],
+  "steps": [
+    {
+      "id": "inspect-1",
+      "operation": "ensure-connection",
+      "documentId": "SYNTHETIC-EXAMPLE",
+      "targets": [
+        {
+          "primitiveId": "w1"
+        }
+      ],
+      "desiredState": {
+        "from": {
+          "componentId": "r1",
+          "pinNumber": "2"
+        },
+        "to": {
+          "componentId": "u1",
+          "pinNumber": "1",
+          "pinName": "IN"
+        },
+        "preserveOtherSegments": true
+      },
+      "preconditions": [
+        "Only use the matching synthetic mock document for this example.",
+        "Resolve current object identities and compare the recorded final state with the live state."
+      ],
+      "evidence": [
+        "N1",
+        "E1",
+        "S1"
+      ],
+      "intentBasis": "inferred",
+      "confidence": "high",
+      "disposition": "inspect",
+      "reason": "The note and before/after pin contacts suggest returning the original endpoint. Current connectivity still needs inspection.",
+      "verify": [
+        "Read back the actual target and required connections.",
+        "Check the user goal and preserved conditions, then run and retain fresh DRC."
+      ]
+    }
+  ],
+  "unresolved": []
+}

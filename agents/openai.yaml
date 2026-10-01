@@ -1,4 +1,0 @@
-interface:
-  display_name: "Circuit Studio 电路修复"
-  short_description: "解析三种导出、理解模糊备注，生成规范 prompt 并通过 Bridge 修复原理图"
-  default_prompt: "使用 $circuit-studio-repair 分析我提供的 Circuit Studio 导出，结合备注、操作记录和当前图纸生成规范修改 prompt，再自动执行明确的局部修复并运行 DRC 复查。"

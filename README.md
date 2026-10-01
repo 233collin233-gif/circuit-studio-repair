@@ -1,130 +1,148 @@
-# Circuit Studio Repair
+# Circuit Studio v1.2.21 and Repair Skill
 
-分析 Circuit Studio 的 **Lint、Recorder、Hybrid** 导出文件，把 DRC、备注和录制变化整理成有证据的修改方案与 prompt，再由 Agent 通过 EasyEDA Bridge 修改原理图并复查。
+Circuit Studio collects schematic evidence in EasyEDA Pro. The accompanying `circuit-studio-repair` skill lets an external Agent interpret that evidence, explain candidate edit intent, create a traceable plan and prompt, and apply authorized changes through EasyEDA Bridge.
 
-支持 Circuit Studio v1.2.19 / v1.2.20，以及导出结构兼容的 **v1.2.21 英文界面版**。修复 skill 的脚本需要 **Node.js 18+**，没有 npm 依赖。语义分析由调用 skill 的外部 Agent 完成；本仓库不包含模型、模型账号或 EasyEDA Bridge 安装包。
+The extension contains no model and makes no model calls. Intent interpretation, clarification, Bridge execution, and post-edit verification belong to the external Agent. This repository supplies no model account, API key, or Bridge installer.
 
-## Circuit Studio v1.2.21 扩展
-
-- [下载 v1.2.21 安装包](https://github.com/233collin233-gif/circuit-studio-repair/raw/main/releases/circuit-studio_v1.2.21.eext)
-- [扩展源码与构建说明](extension/README.md)
-- [本次版本说明](releases/v1.2.21.md) · [SHA-256 校验值](releases/SHA256SUMS.txt)
-
-在 EasyEDA 扩展管理器中导入 `.eext`，关闭旧面板，再打开 **Circuit Studio → Circuit Studio Panel**，确认标题显示 **v1.2.21**。
-
-| 模式 | v1.2.21 操作顺序 |
-| --- | --- |
-| Lint | 用户先在 EasyEDA 运行原生 DRC → **Copy DRC** → **Export JSON report**。复制按钮不运行新的检查。 |
-| Recorder | **Start recording** → 编辑并按需 **Insert note** → **Stop and save** → **Export recording**。 |
-| Hybrid | **Start recording** → 编辑并按需 **Insert note** → **Stop and check** → 等待一次全新原生 DRC → **Export recording + DRC**。 |
-
-扩展只采集、组织和导出 evidence，不调用模型。意图解释、澄清、通过 Bridge 执行修改及修改后的复查属于 external Agent 工作流。Hybrid 的结束检查只覆盖结束时的活动工作表，不锁定画布；用户应等待检查完成再继续编辑。英文界面保留原生 DRC、设计名称和用户备注的原始语言。
-
-## 安装
-
-仓库地址：[233collin233-gif/circuit-studio-repair](https://github.com/233collin233-gif/circuit-studio-repair)。
-
-1. 在本仓库点击 **Code → Download ZIP**，解压。
-2. 将包含 `SKILL.md` 的整个目录命名为 `circuit-studio-repair`，放到技能目录：
-   - Windows：`%USERPROFILE%\.codex\skills\circuit-studio-repair`
-   - macOS / Linux：`~/.codex/skills/circuit-studio-repair`
-3. 在 Agent 中确认可调用 `$circuit-studio-repair`。如果当前任务尚未发现它，直接让 Agent 读取该目录的 `SKILL.md`。
-4. 需要自动修改时，打开目标 EasyEDA Pro 原理图，并连接实验提供的 EasyEDA Bridge。Agent 需要读取本地文件、运行 Node.js 和调用本地 Bridge 的能力。
-
-正确的目录是 `circuit-studio-repair/SKILL.md`，不要多套一层同名文件夹。其他支持文件技能的 Agent 也可读取 `SKILL.md`，但需要按自己的工具环境接入 Bridge。
-
-## 最快开始
-
-把真实导出 JSON 交给 Agent，再发送：
+## Package layout
 
 ```text
-使用 $circuit-studio-repair 分析我附上的导出文件。
-结合 DRC、备注和 recording 理解修改意图，生成 evidence.json、
-repair-plan.json 和 repair-prompt.md，然后执行能确定的修改并重新运行 DRC。
-已满足的目标跳过；只对影响接线或参数选择的剩余歧义向我提问。
+README.md
+LICENSE
+circuit-studio_v1.2.21.eext
+circuit-studio-repair/
+  SKILL.md
+  agents/
+  references/
+  scripts/
+  assets/
 ```
 
-只要方案时，把最后的执行要求替换成“只生成 prompt，暂不修改图纸”。后续继续执行：
+The `.eext` installs into EasyEDA. The complete nested `circuit-studio-repair/` folder installs into the Agent's skill directory. Keep the extension archive outside the installed skill.
+
+## Install the extension
+
+Download [circuit-studio_v1.2.21.eext](circuit-studio_v1.2.21.eext) and import it through EasyEDA's extension manager. Close an earlier Circuit Studio panel, open **Circuit Studio → Circuit Studio Panel**, and check that its title shows **v1.2.21**.
+
+Package SHA-256: `963c20b0e73b006edc31c5f998e0b184ee8ce60602ff385c18d1bbecfe686948`.
+
+| Mode | Actual v1.2.21 sequence |
+| --- | --- |
+| Lint | Run native DRC in EasyEDA → **Copy DRC** → **Export JSON report**. Copying uses existing results and does not rerun DRC. |
+| Recorder | **Start recording** → edit and optionally **Insert note** → **Stop and save** → **Export recording**. The export is observed history, not commands to replay. |
+| Hybrid | **Start recording** → edit and add notes → **Stop and check** → wait for one fresh native DRC → **Export recording + DRC**. |
+
+Recorder captures design changes; selection, zoom, and menu clicks that leave the design unchanged are not design-edit events. Hybrid stops/finalizes recording before checking the active worksheet. It does not lock the canvas or check every worksheet visited during recording. Wait for the check to finish before continuing edits. Failed or incomplete checks remain evidence of failure/incomplete capture, never zero-error results. DRC messages, design names, properties, and user notes retain their original language even with the English interface.
+
+## Install the skill
+
+1. Download this repository through **Code → Download ZIP** and extract it.
+2. Copy the entire nested `circuit-studio-repair/` folder, including `SKILL.md`, `agents`, `references`, `scripts`, and `assets`, to:
+   - Windows: `%USERPROFILE%\.codex\skills\circuit-studio-repair`
+   - macOS/Linux: `~/.codex/skills/circuit-studio-repair`
+3. Verify that `$circuit-studio-repair` is discoverable. If the current chat has not discovered it, instruct the Agent to read the installed `SKILL.md` and relevant referenced files.
+4. Install Node.js 18+ for the local helpers. They need no npm packages.
+5. For actual edits, open the matching EasyEDA Pro schematic and connect the available EasyEDA Bridge. The Agent needs local file/Node access and editor execution tools.
+
+The installed entry should be `.../skills/circuit-studio-repair/SKILL.md`, with one skill folder level. Copying only `SKILL.md`, or merely naming an unread skill in chat, does not load its supporting workflow. Other tool-enabled Agents can read the same files and use their own Bridge integration.
+
+## Copy/paste requests
+
+For analysis only, attach an export or paste raw/fenced JSON:
 
 ```text
-使用 $circuit-studio-repair 执行 repair-prompt.md。
-先核对当前图纸与计划，跳过已经满足的目标，完成其余明确修改并复查。
+Use $circuit-studio-repair to analyze the export or JSON below.
+State the mode and limitations, separate my explicit request from inferred
+intent, cite evidence IDs, and describe targets, desired changes, and what to
+preserve. Produce evidence.json, repair-plan.json, and repair-prompt.md.
+Analyze only; do not edit the schematic.
 ```
 
-## 三种模式
+For analysis and execution:
 
-| 模式 | 如何导出 | Agent 如何理解 |
-| --- | --- | --- |
-| Lint | 先在 EasyEDA 运行 DRC，再复制并导出底部结果 | 保留全部原文、重复行、时间和信息行。`issues.length` 是日志行数，不是缺陷数。 |
-| Recorder | 开始录制 → 编辑并插入备注 → 停止 → 导出 | 根据 `before/after`、接线证据、原生事件和备注判断目标。录制是已发生的历史，不直接重放。 |
-| Hybrid | 开始录制 → 编辑并插入备注 → 停止录制并检查 → 等待 → 导出 | 结合录制收尾后的新一轮 DRC。检查失败仍可分析录制；失败或缺失结果不能当零错误。 |
+```text
+Use $circuit-studio-repair to interpret the attached or pasted evidence and
+repair the matching schematic. Apply clear changes within this request,
+preserve unrelated design choices, and skip goals already satisfied.
+Ask a concise question only for a decisive unresolved design choice.
+Check changed state, my requirements, preservation constraints, and a fresh
+native DRC. Report actual actions, checks, and remaining unknowns.
+```
 
-字段说明见 [导出格式](references/export-formats.md)，实验参与者可阅读 [操作说明](assets/participant-guide.md)。
+For a partial pasted log:
 
-## 备注可以不写成技术指令
+```text
+Use $circuit-studio-repair to analyze the pasted text below as partial evidence.
+Its original export mode and DRC freshness are unknown. Explain supported
+interpretations and missing information; do not claim a full export or make
+schematic edits from this fragment alone.
+```
 
-例如“这根线接回去”“insert 一个电阻在这里”“这个值小一点，别改其他地方”。Agent 会结合前后状态、引脚、网络和当前图纸寻找解释。
+To continue a saved plan:
 
-如果记录明确显示一根线从 U1.IN 移到了 U1.OUT，“接回去”可以结合这些证据定位；如果有两个同样合理的目标，就需要补充具体引脚。未知阻值、供电或拓扑不会凭空填写。已完成的正确修改也不会因为历史记录而被撤销。
+```text
+Use $circuit-studio-repair to execute repair-prompt.md within my requested scope.
+Match the current worksheet, inspect current state, skip satisfied goals,
+reassess changed preconditions, and complete remaining clear steps.
+Report requirement and preservation checks, fresh DRC, and unknowns.
+```
 
-## 输出
+Direct pasting supports analysis without Bridge. If local helpers are available, files and pasted raw/fenced JSON use the same parser. Plain incomplete text is accepted as `text` mode with unknown origin/check status. Generating a prompt does not modify a circuit; actual editing needs an executor connection and matching document.
 
-| 文件 | 用途 |
+## Intent and results
+
+Natural notes such as "connect it back," "insert it here," or "keep this value" are useful evidence. The Agent compares notes, before/after states, object/pin identities, later events, and live state to test candidate interpretations. A decisive missing endpoint, property, or topology remains a question. The workflow cannot guarantee accurate interpretation of every ambiguous note and does not choose random edits until DRC is empty.
+
+Reports use the same seven fields: input/mode/limitations; explicit request; inferred intent with evidence IDs and alternatives; targets/desired changes/preservation; steps (`ready`, `inspect`, `needs-input`, `already-satisfied`); decisive question; actual action/checks/unknowns.
+
+| Artifact | Purpose |
 | --- | --- |
-| `evidence.json` | 保存原始报告，建立带 JSON Pointer 的证据索引。 |
-| `repair-plan.json` | 每步的目标、前置状态、证据 ID、置信度、处置和验收条件。 |
-| `repair-prompt.md` | 可交给下次 Agent 执行的完整修改说明，与输入 SHA-256 绑定。 |
-| `execution-result.json` | 实际执行后记录已改、已满足、待澄清、失败和未执行的步骤。 |
-| 修改前后图纸与 DRC | 支持复查、比较和定向恢复。 |
+| `evidence.json` | Received input, original parsed evidence, SHA-256, diagnostics, and a source index. |
+| `repair-plan.json` | Goal, targets, desired states, preconditions, cited evidence, confidence, intent basis, and checks. |
+| `repair-prompt.md` | English continuation instructions bound to the input hash, with raw evidence in its original language. |
+| `execution-result.json` | Actual applied/satisfied/pending/failed/not-executed steps, checks, and unresolved issues. |
+| Before/after design and DRC | Evidence of observed state and targeted recovery. |
 
-生成 prompt 不代表已经修改电路。实际写入还需要可用的 Bridge、匹配的图纸身份和用户的修改要求。
+The Agent checks changed state, user requirements, preservation constraints, and fresh DRC. A complete check or no DRC violations is not proof of electrical or functional correctness. Missing check data is not zero defects.
 
-## 命令行与示例
+## Local commands
 
-在仓库根目录运行：
+Run these from the repository root:
 
 ```shell
-node scripts/self-check.mjs
-node scripts/report.mjs normalize assets/examples/recorder.json evidence.json
-node scripts/report.mjs compile assets/examples/recorder.json assets/examples/recorder-plan.json repair-prompt.md
-node scripts/bridge.mjs health
+node circuit-studio-repair/scripts/self-check.mjs
+node circuit-studio-repair/scripts/report.mjs normalize export.json evidence.json
+node circuit-studio-repair/scripts/report.mjs normalize pasted.txt evidence.json
+node circuit-studio-repair/scripts/report.mjs normalize - evidence.json
+node circuit-studio-repair/scripts/report.mjs compile export.json repair-plan.json repair-prompt.md
+node circuit-studio-repair/scripts/report.mjs compile - repair-plan.json repair-prompt.md
+node circuit-studio-repair/scripts/bridge.mjs health
 ```
 
-前 3 条命令可离线运行。`normalize` 负责解析；真实 `repair-plan.json` 需要 Agent 根据证据编写，`compile` 负责校验和生成 prompt，不会自动推断意图。
+`-` reads standard input; provide the same exact input bytes for normalization and compilation. The hash covers received bytes before removing a BOM/fence or parsing JSON, so reformatting changes it. A locally saved paste's hash does not establish byte equality with a remote original file. The normalizer preserves evidence; the Agent writes the semantic plan. Compilation checks plan structure and references, not intent or engineering correctness. Chat-only analysis must state when byte-level provenance or script execution is unverified.
 
-`assets/examples/` 提供三种模式的合成报告、计划与 prompt，文档 ID 为 `SYNTHETIC-EXAMPLE`，仅供阅读和离线测试。Hybrid 示例特意展示 DRC 失败时仍保留录制的情况；不要将示例计划应用到真实电路。
+See [export formats](circuit-studio-repair/references/export-formats.md), [intent and plans](circuit-studio-repair/references/intent-and-plan.md), [Bridge execution](circuit-studio-repair/references/bridge-execution.md), and [participant instructions](circuit-studio-repair/assets/participant-guide.md).
 
-Bridge 默认发现本机 `127.0.0.1:49620–49629` 的 `easyeda-bridge` 服务。多窗口需匹配窗口和图纸 UUID。更多命令见 [Bridge 执行说明](references/bridge-execution.md)。
+## Optional confirmed preferences
 
-## 能力边界
+Local memory can reuse an explicitly confirmed preference or correction for one exact project. It is an editable local record, not model training. The Agent must retain the user's actual confirmation quotation and timestamp; it cannot save its own inferred preferences. Current instructions, live state, and engineering constraints always take priority. No personal memory is included in this repository.
 
-- Lint 通常没有图纸 UUID，不能仅凭“当前打开的窗口”认定归属。
-- 接线记录中的坐标接触是证据；电气连接仍需通过当前图纸、网表或 DRC 核实。
-- 模糊备注不一定能唯一消歧，快速连续编辑也可能缺少中间状态。
-- DRC 无错误不等于电路功能正确；验收还要检查目标网络、参数和保留约束。
-- 修改通常最多进行两轮；无进展或写入结果未知时先读回检查，不盲目重试。
+Keep memory files outside the repository and installed skill:
 
-自检覆盖解析、证据引用、prompt 编译和模拟 Bridge 流程，不替代真实 EasyEDA 的端到端验证。
-
-## 目录与维护
-
-`SKILL.md` 是 Agent 入口；`references/` 保存格式和执行规范；`scripts/` 保存解析、编译与 Bridge 辅助程序；`assets/` 保存参与者说明和示例；`agents/` 保存技能展示信息。
-
-真实导出可能包含完整图纸源码。实验记录、参与者资料和 Bridge 凭据应保存在仓库外；公开问题报告请使用脱敏样例。本仓库只提供合成演示数据。
-
-许可见 [LICENSE](LICENSE)。`scripts/drc-reader.js` 与 `extension/linter.js` 及原始 v1.2.21 安装包中的 DRC 读取实现一致，保留其 MIT 许可与作者信息。
-
-## English quick start
-
-Copy this folder to `~/.codex/skills/circuit-studio-repair`, install Node.js 18+, and attach a Circuit Studio export to an agent with local file and tool access. Connect the supplied EasyEDA Bridge for actual edits.
-
-The v1.2.21 extension package is in [`releases/`](releases/v1.2.21.md), with source and build instructions in [`extension/`](extension/README.md). Lint requires a user-run native DRC before copying; Hybrid runs one fresh check after recording stops. The extension itself calls no model. The repair scripts remain dependency-free; only building the extension requires its two development dependencies.
-
-```text
-Use $circuit-studio-repair to analyze this export, infer the intended circuit
-changes from its DRC, notes and recording, and generate a repair plan and prompt.
-Apply well-supported changes to the matching schematic and run a fresh DRC.
-Skip goals already satisfied; ask a focused question for unresolved ambiguity.
+```shell
+node circuit-studio-repair/scripts/memory.mjs list MEMORY.json PROJECT_ID
+node circuit-studio-repair/scripts/memory.mjs remember MEMORY.json ENTRY.json
+node circuit-studio-repair/scripts/memory.mjs forget MEMORY.json PROJECT_ID ENTRY_ID
 ```
 
-Lint mirrors existing DRC text; Recorder describes edits that already happened; Hybrid combines recording with a fresh post-recording check. Failed checks are not zero-error results. The scripts have no npm dependencies or embedded model. The examples are synthetic and must not be executed against real schematics.
+See [confirmed local preferences](circuit-studio-repair/references/preferences.md) for the entry schema and scope rules. New plans can list used entry IDs in optional `context.preferenceIds`; older v1 plans remain compatible.
+
+## Examples and boundaries
+
+[Synthetic examples](circuit-studio-repair/assets/examples/) demonstrate Lint, Recorder, and failed Hybrid inputs with plans/prompts. Their document ID is `SYNTHETIC-EXAMPLE`. Read or test them offline; do not apply them to a real schematic. Self-checks validate parsing, prompt compilation, and a simulated Bridge, not live EasyEDA electrical behavior.
+
+Bridge helpers discover local `easyeda-bridge` on ports 49620-49629; multiple windows require verified identity. Before writing, the Agent saves current source, verifies target objects and current preconditions, and uses bounded changes. It reads back uncertain outcomes before retrying and normally stops after two local repair rounds or a repeated failure/no progress.
+
+Lint/text commonly lack document identity. Coordinate contact alone does not prove electrical connectivity, and rapid recording can omit intermediate states. Keep real participant records, design exports, and credentials outside this public repository; exports can contain complete schematic source.
+
+The [skill entry](circuit-studio-repair/SKILL.md) is the Agent workflow. [LICENSE](LICENSE) provides the MIT terms. The DRC reader retains the v1.2.21 implementation's license and attribution.

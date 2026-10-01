@@ -1,0 +1,4 @@
+interface:
+  display_name: "Circuit Studio Repair"
+  short_description: "Resolve circuit intent and apply traceable schematic repairs"
+  default_prompt: "Use $circuit-studio-repair to analyze my export or pasted evidence, explain supported intent, and create a plan and prompt. Execute only when I request repairs, then report actual changes and verification."
