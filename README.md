@@ -100,10 +100,12 @@ Reports use the same seven fields: input/mode/limitations; explicit request; inf
 | `evidence.json` | Received input, original parsed evidence, SHA-256, diagnostics, and a source index. |
 | `repair-plan.json` | Goal, targets, desired states, preconditions, cited evidence, confidence, intent basis, and checks. |
 | `repair-prompt.md` | English continuation instructions bound to the input hash, with raw evidence in its original language. |
-| `execution-result.json` | Actual applied/satisfied/pending/failed/not-executed steps, checks, and unresolved issues. |
-| Before/after design and DRC | Evidence of observed state and targeted recovery. |
+| `execution-result.json` | Dispatch outcome, observed state, DRC capture status, and remaining review needs. |
+| `round.json` and archived files | A unique round ID, optional previous-round link, and hashes of input, plan, prompt, JavaScript, inspection evidence, before/after state, DRC, and execution result. |
 
-The Agent checks changed state, user requirements, preservation constraints, and fresh DRC. A complete check or no DRC violations is not proof of electrical or functional correctness. Missing check data is not zero defects.
+Round outcomes are `not-executed`, `blocked`, `execution-unknown`, `executed-awaiting-review`, or `executed-checks-incomplete`. They describe execution and evidence capture, not automatic acceptance. The Agent and user must still review requirements and preservation constraints against observed state. A complete check or no DRC violations is not proof of electrical or functional correctness. Missing check data is not zero defects.
+
+Correct an interpretation by stating the current request separately from the original export. The Agent preserves the received JSON, updates `context.userRequest`, revises the plan, and regenerates and reviews the JavaScript before a new round with a fresh baseline. Earlier rounds remain traceable; a correction does not rewrite their history.
 
 ## Local commands
 
@@ -111,6 +113,8 @@ Run these from the repository root:
 
 ```shell
 node circuit-studio-repair/scripts/self-check.mjs
+node circuit-studio-repair/scripts/evidence-check.mjs
+node circuit-studio-repair/scripts/round-check.mjs
 node circuit-studio-repair/scripts/report.mjs normalize export.json evidence.json
 node circuit-studio-repair/scripts/report.mjs normalize pasted.txt evidence.json
 node circuit-studio-repair/scripts/report.mjs normalize - evidence.json
@@ -119,7 +123,19 @@ node circuit-studio-repair/scripts/report.mjs compile - repair-plan.json repair-
 node circuit-studio-repair/scripts/bridge.mjs health
 ```
 
-`-` reads standard input; provide the same exact input bytes for normalization and compilation. The hash covers received bytes before removing a BOM/fence or parsing JSON, so reformatting changes it. A locally saved paste's hash does not establish byte equality with a remote original file. The normalizer preserves evidence; the Agent writes the semantic plan. Compilation checks plan structure and references, not intent or engineering correctness. Chat-only analysis must state when byte-level provenance or script execution is unverified.
+`-` reads standard input; provide the same exact input bytes for normalization and compilation. The hash covers received bytes before removing a BOM/fence or parsing JSON, so reformatting changes it. A locally saved paste's hash does not establish byte equality with a remote original file. The normalizer preserves evidence; the Agent writes the semantic plan. Compilation checks plan structure, evidence references, and cited `liveEvidence` files against their hashes and JSON pointers. Relative evidence paths resolve from the plan's directory. It does not determine intent or engineering correctness. Chat-only analysis must state when byte-level provenance or script execution is unverified.
+
+For an authorized write, use an inspected baseline and a new round directory:
+
+```shell
+node circuit-studio-repair/scripts/bridge.mjs inspect --window WINDOW_ID --out baseline.json
+node circuit-studio-repair/scripts/round.mjs execute --input export.json --plan repair-plan.json --step STEP_ID --code patch.js --baseline baseline.json --out-dir NEW_DIRECTORY --window WINDOW_ID
+node circuit-studio-repair/scripts/round.mjs verify NEW_DIRECTORY/round.json
+```
+
+The plan must contain a nonempty `context.userRequest`, `context.executionScope: "authorized-repair"`, and a selected `ready` step. The Agent writes and reviews `patch.js`; report strings are never executable instructions. The complete baseline source must match the live source exactly, including metadata. The helper rechecks the document and source inside the editor immediately before the patch; this does not lock the editor against later concurrent changes. Any mismatch requires review and a new snapshot. The round helper attempts independent readback and fresh DRC after a dispatched write, including an execution error, without retrying the write.
+
+Use `--previous PRIOR_ROUND_JSON` for a later round on the same document; previous history must pass hash verification. Use `--port N` when selecting a Bridge. Round directories cannot be overwritten. `round.mjs verify` checks archived file integrity only; it does not validate intent, correctness, or requirements.
 
 See [export formats](circuit-studio-repair/references/export-formats.md), [intent and plans](circuit-studio-repair/references/intent-and-plan.md), [Bridge execution](circuit-studio-repair/references/bridge-execution.md), and [participant instructions](circuit-studio-repair/assets/participant-guide.md).
 
@@ -141,8 +157,8 @@ See [confirmed local preferences](circuit-studio-repair/references/preferences.m
 
 [Synthetic examples](circuit-studio-repair/assets/examples/) demonstrate Lint, Recorder, and failed Hybrid inputs with plans/prompts. Their document ID is `SYNTHETIC-EXAMPLE`. Read or test them offline; do not apply them to a real schematic. Self-checks validate parsing, prompt compilation, and a simulated Bridge, not live EasyEDA electrical behavior.
 
-Bridge helpers discover local `easyeda-bridge` on ports 49620-49629; multiple windows require verified identity. Before writing, the Agent saves current source, verifies target objects and current preconditions, and uses bounded changes. It reads back uncertain outcomes before retrying and normally stops after two local repair rounds or a repeated failure/no progress.
+Bridge helpers discover local `easyeda-bridge` on ports 49620-49629; multiple windows require verified identity. Use the round workflow for writes. The lower-level `bridge.mjs run` is for inspected exceptions and does not waive authorization, baseline, evidence, or verification requirements. A timeout leaves execution unknown: preserve the record, inspect current state, and do not repeat the uncertain write automatically. Default to at most two reviewed local repair rounds; stop earlier on repeated failure or no progress.
 
-Lint/text commonly lack document identity. Coordinate contact alone does not prove electrical connectivity, and rapid recording can omit intermediate states. Keep real participant records, design exports, and credentials outside this public repository; exports can contain complete schematic source.
+Lint/text commonly lack document identity. Coordinate contact alone does not prove electrical connectivity, and rapid recording can omit intermediate states. Keep real participant records, design exports, round histories, and credentials outside this public repository; exports and archives can contain complete schematic source.
 
 The [skill entry](circuit-studio-repair/SKILL.md) is the Agent workflow. [LICENSE](LICENSE) provides the MIT terms. The DRC reader retains the v1.2.21 implementation's license and attribution.

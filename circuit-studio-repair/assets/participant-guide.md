@@ -71,14 +71,31 @@ preconditions, and complete the remaining clear steps with fresh DRC.
 
 If two endpoints or interpretations remain plausible, or a required property is missing, expect a concise question. An Agent cannot guarantee that it understands every vague expression. It should continue independent clear steps and should not invent a value or connection merely to remove DRC messages.
 
+To correct an interpretation, state the current goal separately; keep the original export unchanged:
+
+```text
+My current request is: [describe the corrected target, change, and constraints].
+Keep the original JSON unchanged. Update the plan and prompt, regenerate and
+review the change code, inspect a fresh baseline, and use a new repair round.
+Keep earlier rounds available for review.
+```
+
+The Agent records this correction as the current request, rather than changing what the Recorder originally captured. A saved preference is optional and separate from correcting this task.
+
 ## Results
 
 - `evidence.json`: original received input, parsed evidence, input hash, and source index.
 - `repair-plan.json`: targets, desired states, cited evidence, explicit/inferred intent, dispositions, and checks.
 - `repair-prompt.md`: reusable English execution instructions; raw evidence keeps its original language.
-- After actual execution: backups, before/after DRC, and `execution-result.json` with applied/satisfied/pending/failed/not-executed outcomes.
+- For an execution round: a new directory containing received input, plan, prompt, actual JavaScript, inspected evidence, before/after state, DRC, and `execution-result.json`. `round.json` gives the round ID, a previous-round link when used, and archived file hashes.
 
-The response identifies input/mode/limitations, explicit request, inferred intent with evidence IDs and alternatives, targets/desired changes/preservation, step dispositions, any decisive question, and actual actions/checks/unknowns. A generated prompt does not mean the schematic changed. A fresh DRC and state checks do not prove the circuit is electrically or functionally correct. Avoid concurrent editing while the Agent is writing or verifying the worksheet.
+The response uses seven fields: input/mode/limitations; explicit request; inferred intent with evidence IDs and alternatives; targets/desired changes/preservation; step dispositions; any decisive question; actual actions/checks/unknowns.
+
+Execution outcomes are `not-executed`, `blocked`, `execution-unknown`, `executed-awaiting-review`, or `executed-checks-incomplete`. The Agent must explain what each result means for this round. A generated prompt does not mean the schematic changed; an executed round still needs review against your requirements and preserved conditions. A fresh DRC does not prove electrical or functional correctness.
+
+Normal writes use `round.mjs execute`, which requires an explicit repair request, a ready plan step, and an exact match between the inspected baseline and current complete source. A changed source requires a new inspection and review. The helper attempts readback and fresh DRC after a dispatched write even when execution reports an error. A timeout is uncertain and must not trigger an automatic repeat. Avoid concurrent editing while the Agent is writing or verifying.
+
+`round.mjs verify ROUND_JSON` checks archived file integrity only. It does not grade intent interpretation or validate the circuit. Keep real exports, round histories, and participant information outside the public repository.
 
 Optional local preferences require an explicit user confirmation to save a specific preference/correction for the exact project, with its quote and timestamp. They are editable/removable local records, not model training, and cannot override current instructions, live state, or engineering constraints. The repository contains no personal memory; see [../references/preferences.md](../references/preferences.md).
 

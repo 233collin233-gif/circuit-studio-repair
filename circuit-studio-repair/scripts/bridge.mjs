@@ -46,7 +46,18 @@ async function main() {
   if (!opts.out) throw new Error('--out is required to preserve full output.');
   if (opts.code && path.resolve(opts.code) === path.resolve(opts.out)) throw new Error('Output would overwrite code input.');
   const windowId = await selectWindow(base, opts.window);
-  const expected = opts.document ? JSON.stringify(opts.document) : null;
+  const result = await execute(base, windowId, command, {
+    documentId: opts.document,
+    code: opts.code ? await fs.readFile(opts.code, 'utf8') : undefined
+  });
+  await fs.writeFile(opts.out, JSON.stringify(result, null, 2));
+  console.log(JSON.stringify({ windowId, file: path.resolve(opts.out), success: true }));
+}
+
+// Shared transport for the CLI and the recorded execution workflow.
+export async function execute(base, windowId, command, options = {}) {
+  if (!['inspect', 'drc', 'run'].includes(command)) throw new Error('Unsupported editor command');
+  const expected = options.documentId ? JSON.stringify(options.documentId) : null;
   const guard = `const info = await eda.dmt_SelectControl.getCurrentDocumentInfo();\n` +
     (expected ? `if (!info || info.uuid !== ${expected}) throw new Error('Target document changed; nothing executed.');\n` : '');
   let code;
@@ -55,17 +66,18 @@ async function main() {
   } else {
     if (!expected) throw new Error('--document UUID is required before DRC or mutation.');
     if (command === 'run') {
-      if (!opts.code) throw new Error('--code must name a reviewed JavaScript body, never an export note.');
-      code = guard + '\nreturn await (async () => {\n' + await fs.readFile(opts.code, 'utf8') + '\n})();';
+      if (typeof options.code !== 'string' || !options.code.trim()) throw new Error('Provide reviewed Agent-authored JavaScript, never an export note.');
+      const sourceGuard = options.expectedSource === undefined ? ''
+        : `const liveSource = await eda.sys_FileManager.getDocumentSource();\nconst writeInfo = await eda.dmt_SelectControl.getCurrentDocumentInfo();\nif (writeInfo?.uuid !== ${expected} || liveSource !== ${JSON.stringify(options.expectedSource)}) throw new Error('Document or source changed before execution; patch not started.');\n`;
+      code = guard + sourceGuard + '\nreturn await (async () => {\n' + options.code + '\n})();';
     } else {
       const reader = await fs.readFile(new URL('./drc-reader.js', import.meta.url), 'utf8');
       code = guard + '\nreturn await (async () => {\n' + reader + `\nconst issues = await CircuitStudioLinter.runLint({rerun:true});\nconst after = await eda.dmt_SelectControl.getCurrentDocumentInfo();\nif (after?.uuid !== ${expected}) throw new Error('Document changed during DRC');\nreturn {kind:'lint', at:new Date().toISOString(), document:info, issues, text:issues.map(r=>r.rawText).join('\\n'),diag:globalThis.__csLastLintDiag};\n})();`;
     }
   }
   // A timeout has an uncertain outcome. The CLI deliberately never retries writes.
-  const response = await request(base, '/execute', { code, windowId }, 120000);
-  await fs.writeFile(opts.out, JSON.stringify(response.result, null, 2));
-  console.log(JSON.stringify({ windowId, file: path.resolve(opts.out), success: true }));
+  const response = await request(base, '/execute', { code, windowId }, options.timeout ?? 120000);
+  return response.result;
 }
 if (process.argv[1] && import.meta.url === pathToFileURL(path.resolve(process.argv[1])).href) {
   main().catch(error => { console.error(error.message); process.exitCode = 1; });

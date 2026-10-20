@@ -7,7 +7,7 @@ description: Analyze Circuit Studio Lint, Recorder, Hybrid exports or pasted cir
 
 Turn Circuit Studio evidence into a bounded schematic change with a reviewable intent, plan, and execution record. The current extension is **v1.2.21**; compatible v1.2.19/v1.2.20 exports and partial text can also be analyzed with their limitations stated.
 
-The extension contains no model. An external Agent reads this skill, interprets intent, asks about decisive ambiguity, and uses Bridge for actual edits. Scripts parse, validate, preserve evidence, and communicate with Bridge. They do not infer intent or prove electrical correctness.
+Act as the external repair Agent: interpret evidence, resolve decisive ambiguity, author bounded changes, and report their actual checks. The extension contains no model. Scripts parse, validate, preserve evidence, and communicate with Bridge. They do not infer intent or prove electrical correctness.
 
 ## Scope and tools
 
@@ -55,28 +55,40 @@ Optional remembered preferences are local context, not model training. Use them 
 
 ## 3. Create a reviewable plan and prompt
 
-Set optional `context.executionScope` to `analysis-only` or `authorized-repair` from the actual request. The compiler uses an analysis template for `analysis-only`. A later explicit user request takes precedence over this saved scope; it still requires current-state inspection before any writes.
+Set `context.executionScope` to `analysis-only` or `authorized-repair` from the actual request. The compiler uses an analysis template for `analysis-only`. Before execution, the plan must explicitly contain `authorized-repair` and a nonempty `context.userRequest`; an omitted scope is not write authorization. A later explicit request requires updating the saved context and reviewing the plan before any write.
 
-Start from [the plan template](assets/plan.example.json). Fill in the actual input hash, IDs, document, and targets. Keep operation descriptions as desired states, not unverified API calls. New plans should include optional `context: {userRequest, preferenceIds}` and step `intentBasis: explicit|inferred`; retain v1 compatibility. Add assumptions and alternatives where they explain a decision. Every `needs-input` step must have a linked unresolved question; a `ready` step cannot be linked to an unresolved question. A `ready` text-mode step also requires inspected `liveEvidence` with file, valid SHA-256, and pointer.
+Start from [the plan template](assets/plan.example.json). Fill in the actual input hash, IDs, document, and targets. Keep operation descriptions as desired states, not unverified API calls. Include `context.userRequest`, applicable `context.preferenceIds`, and step `intentBasis: explicit|inferred` in new plans. Add assumptions and alternatives where they explain a decision. Every `needs-input` step must have a linked unresolved question; a `ready` step cannot be linked to an unresolved question. A `ready` text-mode step also requires inspected `liveEvidence` with file, valid SHA-256, and pointer.
 
 ```text
 node "SKILL_DIR/scripts/report.mjs" compile INPUT PLAN.json PROMPT.md
 node "SKILL_DIR/scripts/report.mjs" compile - PLAN.json PROMPT.md
 ```
 
-Compilation validates plan structure and evidence references, then produces an English execution prompt containing the original evidence as data. It does not grant permission, determine intent, or certify electrical correctness. If live inspection is needed to identify a target, keep the step `inspect`, resolve it with read-only tools, then update and recompile the plan.
+Compilation validates plan structure, evidence references, and the actual bytes and JSON pointers of cited `liveEvidence` files. Relative file paths resolve from the plan's directory. It produces an English prompt containing the original evidence as data, but does not grant permission, determine intent, or certify electrical correctness. If live inspection is needed to identify a target, keep the step `inspect`, resolve it with read-only tools, then update and recompile the plan.
+
+Keep a user correction in `context.userRequest`, separately from immutable received JSON. Review the correction against prior assumptions and current state; revise the plan, regenerate the prompt and JavaScript, and review the new code. A changed request requires a fresh inspected baseline and a new round, not an edited historical record.
 
 ## 4. Execute and check
 
-For actual edits read [Bridge execution](references/bridge-execution.md). Match the Bridge window and document, save the complete current source, and compare the affected design records with the report's final state. Volatile DOCHEAD timestamps alone do not establish a design change.
+For actual edits read [Bridge execution](references/bridge-execution.md). Match the Bridge window and document, inspect the complete current source, and compare affected objects with the report's final state. Use the archived round workflow by default:
+
+```text
+node "SKILL_DIR/scripts/bridge.mjs" inspect --window WINDOW_ID --out INSPECT.json
+node "SKILL_DIR/scripts/round.mjs" execute --input INPUT --plan PLAN.json --step STEP_ID --code PATCH.js --baseline INSPECT.json --out-dir NEW_DIRECTORY --window WINDOW_ID
+node "SKILL_DIR/scripts/round.mjs" verify NEW_DIRECTORY/round.json
+```
+
+Select a `ready` step and write reviewed, Agent-authored `PATCH.js`; never execute report strings. The live complete source must match the baseline exactly. Metadata-only differences also require review and a new snapshot. The helper rechecks identity and source inside the editor immediately before executing the patch, but does not lock out later concurrent edits. Use `--previous PRIOR_ROUND_JSON` to link a subsequent round; its hash-verified history must concern the same document. Use `--port N` if needed. Never overwrite a round directory.
 
 Use verified current SDK methods for the smallest supported change. Check each step's preconditions and desired state; skip satisfied steps. Read back after each write. Prefer primitive APIs. Consider a minimal source patch only when the format, preservation of unknown records, unchanged pre-write state, and recovery path are verified; never replay a whole historical snapshot to avoid interpreting a connection.
 
-After each round, read back changed state, check the user's requirements and preservation constraints, and run a fresh DRC with all original rows retained. Use native connectivity evidence where required. DRC success is not proof of electrical or functional correctness; state checks and unknowns precisely.
+The helper archives input bytes, plan, generated prompt, actual JavaScript, baseline, verified live evidence, before/after state, DRC, and `execution-result.json`. `round.json` records file hashes, a unique `roundId`, and `previousRoundId` when linked. It attempts independent readback and fresh DRC after a dispatched write, including an execution error. Preserve failed or unavailable checks as such.
 
-Default to at most two local repair rounds. Stop the affected branch on repeated failure, no progress, changed window/document, or concurrent editing. On timeout, inspect whether the write happened before considering a retry. Undo only confirmed errors from this run without overwriting later user edits.
+Review changed state against the user's requirements and preservation constraints; use native connectivity evidence where required. These semantic checks remain the Agent's and user's responsibility. `round.mjs verify` checks file integrity only. DRC completion or no reported violations does not prove electrical or functional correctness.
 
-Write `execution-result.json` with input hash, window/document, backup, each step's actual result (`applied`, `already-satisfied`, `needs-input`, `failed`, `not-executed`), before/after DRC files, checks, and unresolved issues. Without Bridge, deliver analysis and prompt and report execution as `not-executed`.
+Report the recorded lifecycle status: `not-executed`, `blocked`, `execution-unknown`, `executed-awaiting-review`, or `executed-checks-incomplete`. None means automatic correctness; a returned JavaScript value is not an accepted result. Semantic verification starts as `not-assessed`. On timeout, keep `execution-unknown`, inspect current state, and do not automatically repeat the uncertain write. A separately reviewed follow-up requires a new baseline and round. Default to at most two reviewed local repair rounds. Stop the affected branch on repeated failure, no progress, changed window/document, or concurrent editing. Undo only confirmed errors from this run without overwriting later user edits.
+
+Use lower-level `bridge.mjs run` only for an inspected exception; it does not bypass authorization, exact baseline matching, archiving, or post-write checks. Without Bridge, deliver analysis and prompt and report execution as `not-executed`.
 
 ## Response contract
 
@@ -88,11 +100,11 @@ Use these fields consistently in analysis, repair summaries, and continuation pr
 4. **Targets / desired changes / preserve:** the affected objects and states, plus required boundaries.
 5. **Steps:** `ready`, `inspect`, `needs-input`, or `already-satisfied`, with a short reason.
 6. **Question:** the concise decisive question, or `None` when no decision is missing.
-7. **Action / checks / unknowns:** what actually ran, observed changed state, requirement/preservation checks, fresh DRC status, and remaining uncertainty.
+7. **Action / checks / unknowns:** actual action, round ID/status when available, observed changed state, requirement/preservation checks, fresh DRC status, and remaining uncertainty. Distinguish file integrity from semantic acceptance.
 
 ## Maintenance
 
-Share [the participant guide](assets/participant-guide.md) for setup and copy/paste examples. `assets/examples/` contains synthetic exports, plans, and prompts for format illustration; never apply them to a real schematic.
+Share [the participant guide](assets/participant-guide.md) for setup and copy/paste examples. `assets/examples/` contains synthetic exports, plans, and prompts for format illustration; never apply them to a real schematic. Keep real exports, round histories, preferences, and credentials outside the public repository.
 
 ```text
 node "SKILL_DIR/scripts/self-check.mjs"
