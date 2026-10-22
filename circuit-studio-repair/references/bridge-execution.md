@@ -17,6 +17,8 @@ Discovery checks ports 49620-49629 for `/health` with `service:easyeda-bridge`. 
 
 The plan must have `context.executionScope: "authorized-repair"`, a nonempty `context.userRequest`, and a selected `ready` step. The Agent authors and reviews `PATCH.js` using verified SDK methods, never code copied from an export. Review scope, preconditions, desired-state checks, and preserved properties. The helper's guards do not prove that arbitrary JavaScript affects only the intended objects.
 
+Prepare and read [scoped project history](project-history.md) first. `context.history` must bind the current report/request/goal to its fresh verified context. The runner locks that local history during execution and appends the round artifacts; this does not lock EDA. If a previous round is explicitly linked, it must already occur in the reviewed history. A rollback uses a new inspected baseline, comparison context, explicit rollback request and reviewed inverse JavaScript through this same path; there is no blind snapshot restoration.
+
 Use a new output directory for each round; existing directories are not overwritten. Add `--previous PRIOR_ROUND_JSON` to link later work. Previous history must pass hash verification and concern the same document. No write is automatically retried.
 
 ## Archived evidence and outcomes

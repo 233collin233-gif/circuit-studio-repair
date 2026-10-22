@@ -184,9 +184,9 @@ export function validatePlan(plan, n) {
   return plan;
 }
 
-export function compile(plan, n) {
+export function compile(plan, n, history) {
   validatePlan(plan, n);
-  const payload = JSON.stringify({ plan, evidence: n }, null, 2);
+  const payload = JSON.stringify({ plan, evidence: n, ...(history ? { projectHistory: history } : {}) }, null, 2);
   const fence = '`'.repeat(Math.max(2, ...(payload.match(/`+/g) || []).map(x => x.length)) + 1);
   if (plan.context?.executionScope === 'analysis-only') {
     return `# Circuit Studio analysis prompt\n\nUse $circuit-studio-repair. This plan was prepared for analysis only. Follow the current user's scope; without a later repair request, do not write to the schematic or run editor checks on their behalf.\n\n` +
@@ -251,9 +251,12 @@ async function main() {
   } else if (command === 'compile' && input && extra && output) {
     const n = await readInput(input), plan = JSON.parse((await fs.readFile(extra, 'utf8')).replace(/^\uFEFF/, ''));
     if ([input, extra].filter(x => x !== '-').some(x => path.resolve(x) === path.resolve(output))) fail('Output would overwrite an input.');
-    const prompt = compile(plan, n);
+    const history = plan.context?.history ? await (await import('./history.mjs')).verifyHistoryReview(plan,
+      path.dirname(path.resolve(extra)), plan.context.history.documentId) : null;
+    const prompt = compile(plan, n, history?.context);
     const verified = await verifyLiveEvidence(plan, path.dirname(path.resolve(extra)));
     if (verified.some(ref => ref.file === path.resolve(output))) fail('Output would overwrite live evidence.');
+    if (history && history.reference.file === path.resolve(output)) fail('Output would overwrite reviewed history.');
     await fs.writeFile(output, prompt); console.log('Validated ' + verified.length + ' live evidence references and wrote ' + output);
   } else fail('Usage: node report.mjs normalize INPUT EVIDENCE.json | compile INPUT PLAN.json PROMPT.md; INPUT may be a file or - for stdin.');
 }

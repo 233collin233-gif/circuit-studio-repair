@@ -7,6 +7,7 @@ import vm from 'node:vm';
 import { MessageChannel } from 'node:worker_threads';
 import { executeRound, verifyRound } from './round.mjs';
 import { parseInput, sha256 } from './report.mjs';
+import { initHistory, recordReport, writeHistoryContext, loadHistoryContext, prepareRollback, appendRound } from './history.mjs';
 
 // All inputs, outputs and editor state are synthetic. The server binds only to
 // loopback, on an ephemeral port explicitly passed to every execution.
@@ -214,8 +215,16 @@ async function fixture(changes = {}) {
     'baseline.json': encode(baseline), 'live.json': evidenceBytes
   };
   for (const [file, bytes] of Object.entries(values)) await fs.writeFile(path.join(dir, file), bytes);
+  const historyDir = changes.historyDir ?? path.join(dir, 'history');
+  if (!changes.historyDir) await initHistory(historyDir, { projectId: 'synthetic-project', documentId: targetDocumentId });
+  await recordReport(historyDir, { input: path.join(dir, 'input.txt'), context: {
+    userRequest: plan.context.userRequest || 'Synthetic current request.', goal: plan.goal, clarifications: []
+  } });
+  plan.context.history = await writeHistoryContext(historyDir, path.join(dir, 'history-context.json'));
+  values['plan.json'] = encode(plan);
+  await fs.writeFile(path.join(dir, 'plan.json'), values['plan.json']);
   return {
-    dir, values, plan,
+    dir, values, plan, historyDir,
     options: { input: path.join(dir, 'input.txt'), plan: path.join(dir, 'plan.json'),
       step: 'repair-wire', code: path.join(dir, 'patch.js'), baseline: path.join(dir, 'baseline.json'),
       outDir: path.join(temp, 'round-' + serial), port: String(server.address().port) }
@@ -245,7 +254,7 @@ async function replaceFixtureArtifact(result, file, value) {
 async function linkedFixture() {
   const first = await fixture();
   const previous = await executeRound(first.options);
-  const second = await fixture({ source: desiredSource });
+  const second = await fixture({ source: desiredSource, historyDir: first.historyDir });
   second.options.previous = previous.file;
   return executeRound(second.options);
 }
@@ -409,10 +418,56 @@ try {
       /context.userRequest/);
   });
 
+  await test('A write without reviewed history is rejected before editor access', async () => {
+    const f = await fixture(); delete f.plan.context.history; await rewritePlan(f);
+    await rejected(f, /Missing reviewed project history/);
+  });
+
+  await test('A new clarification makes the old reviewed history stale before a write', async () => {
+    const f = await fixture();
+    await recordReport(f.historyDir, { input: f.options.input, context: { userRequest: 'Use a different endpoint.',
+      goal: 'Resolve the changed endpoint.', clarifications: [{ id: 'q1', question: 'Which endpoint?', answer: 'A different endpoint.', at: '2026-10-22T12:00:00Z' }] } });
+    await rejected(f, /stale or changed/);
+  });
+
+  await test('A clear current request can execute without a recorded note', async () => {
+    const f = await fixture({ input: encode({ kind: 'recorder', document: { uuid: documentId },
+      sessionId: 'no-note', events: [{ eventType: 'wire.modify', primitiveId: 'wire-1' }], notes: [] }) });
+    const result = await executeRound(f.options);
+    assert.equal(result.record.status, 'executed-awaiting-review');
+    assert.equal((await loadHistoryContext(f.historyDir)).entries.at(-1).artifacts['patch.js'].content, patch);
+  });
+
+  await test('Rollback preparation does not write; a reviewed inverse preserves later unrelated edits', async () => {
+    const first = await fixture(), prior = await executeRound(first.options);
+    const changed = JSON.parse(state.source); changed.untouched.value = '22k';
+    reset({ source: JSON.stringify(changed) });
+    const request = 'Undo the wire-1 change and preserve the later resistor value.';
+    const inverse = patch.replaceAll("'new-pin'", "'old-pin'");
+    const next = await fixture({ historyDir: first.historyDir, source: state.source, userRequest: request, code: inverse,
+      changePlan: plan => { plan.goal = 'Restore wire-1 to old-pin.'; plan.steps[0].desiredState.endpoint = 'old-pin'; } });
+    const rollback = await prepareRollback(next.historyDir, { roundId: prior.record.roundId, baseline: next.options.baseline });
+    assert.equal(rollback.currentMatchesHistoricalAfter, false);
+    assert.equal(rollback.originalJavaScript, patch);
+    assert.equal(state.writes, 0);
+    const bytes = encode(rollback), file = path.join(next.dir, 'rollback.json'); await fs.writeFile(file, bytes);
+    next.plan.context.rollback = { file, sha256: sha256(bytes), authorized: false, request };
+    await rewritePlan(next); await rejected(next, /authorization/);
+    next.plan.context.rollback.authorized = true; await rewritePlan(next);
+    const result = await executeRound(next.options);
+    assert.equal(result.record.status, 'executed-awaiting-review');
+    assert.equal(JSON.parse(state.source).wire.endpoint, 'old-pin');
+    assert.equal(JSON.parse(state.source).untouched.value, '22k');
+    assert.equal(state.writes, 1);
+    const context = await loadHistoryContext(next.historyDir);
+    assert.ok(context.entries.some(e => e.artifacts['patch.js']?.content === patch));
+    assert.ok(context.entries.some(e => e.artifacts['patch.js']?.content === inverse));
+  });
+
   await test('Continuation links the prior round while preserving both independent requests', async () => {
     const first = await fixture(), previous = await executeRound(first.options);
     const previousBytes = await fs.readFile(previous.file);
-    const second = await fixture({ source: desiredSource,
+    const second = await fixture({ source: desiredSource, historyDir: first.historyDir,
       userRequest: 'Confirm wire-1 remains on new-pin and preserve the prior repair.' });
     second.options.previous = previous.file;
     const next = await executeRound(second.options);
@@ -427,6 +482,61 @@ try {
     await verifyRound(previous.file);
     await verifyRound(next.file);
   });
+
+  await test('A pre-history round can be imported with its actual code, state and outcome', async () => {
+    const f = await fixture(), result = await executeRound(f.options);
+    const plan = await readJson(result, 'repair-plan.json'); delete plan.context.history;
+    const bytes = await replaceFixtureArtifact(result, 'repair-plan.json', plan);
+    await editManifest(result, record => {
+      record.planSha256 = sha256(bytes);
+      delete record.projectId; delete record.historyHeadId; delete record.historyContextSha256;
+      record.artifacts = record.artifacts.filter(item => item.file !== 'history-context.json');
+    });
+    await verifyRound(result.file);
+    const imported = path.join(f.dir, 'imported-history');
+    await initHistory(imported, { projectId: 'synthetic-project', documentId });
+    await appendRound(imported, result.file);
+    const context = await loadHistoryContext(imported);
+    assert.equal(context.entries[0].status, 'executed-awaiting-review');
+    assert.equal(context.entries[0].artifacts['patch.js'].content, patch);
+    assert.equal(JSON.parse(context.entries[0].artifacts['after.json'].content).source, desiredSource);
+    await assert.rejects(appendRound(imported, result.file), /already in history/);
+  });
+
+  await test('Rollback preparation rejects a round with unavailable readback', async () => {
+    const f = await fixture(); state.failReadback = true;
+    const result = await executeRound(f.options);
+    await assert.rejects(prepareRollback(f.historyDir, { roundId: result.record.roundId, baseline: f.options.baseline }), /before and after/);
+  });
+
+  for (const failAt of [2, 3]) {
+    await test('Checkpoint failure ' + (failAt === 2 ? 'before dispatch blocks the write' : 'after dispatch still attempts independent readback and DRC'), async () => {
+      const f = await fixture(), originalRename = fs.rename;
+      let checkpoints = 0, result;
+      fs.rename = async (...args) => {
+        if (path.basename(args[0]) === '.round.pending' && ++checkpoints === failAt) {
+          throw Object.assign(new Error('Synthetic manifest replacement failure.'), { code: 'EACCES' });
+        }
+        return originalRename(...args);
+      };
+      try { result = await executeRound(f.options); }
+      finally { fs.rename = originalRename; }
+      if (failAt === 2) {
+        assert.equal(state.writes, 0);
+        assert.equal(result.record.status, 'blocked');
+        assert.deepEqual(state.calls, ['inspect']);
+      } else {
+        assert.equal(state.writes, 1);
+        assert.equal(result.record.status, 'executed-checks-incomplete');
+        assert.deepEqual(state.calls, ['inspect', 'run', 'inspect', 'drc']);
+        assert.equal(result.record.stages.readback, 'captured');
+        assert.equal(result.record.stages.drc, 'captured');
+        assert.equal((await readJson(result, 'execution-result.json')).checks.postWriteCheckpoint, 'failed');
+        assert.ok(result.record.errors.some(e => e.message.includes('Post-write checkpoint failed')));
+      }
+      await verifyRound(result.file);
+    });
+  }
 
   await test('A prior round for another document cannot be linked', async () => {
     state.documentId = 'different-page';

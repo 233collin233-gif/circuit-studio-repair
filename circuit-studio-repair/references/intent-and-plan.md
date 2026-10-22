@@ -10,6 +10,8 @@ Keep four things distinct: the current explicit request, what notes might mean, 
 4. Mark a uniquely supported, constrained result `ready`; execution still requires live preflight. Use `already-satisfied` only after checking the live design. A matching captured final snapshot supports `inspect`, with live confirmation still required. Use `inspect` when read-only information can decide the issue and `needs-input` when the user must choose.
 5. Continue independent clear steps. Ask the shortest question that resolves the remaining design decision, with relevant alternatives; do not ask a broad permission question when execution was already requested.
 
+Missing notes alone do not require a question when the current request and state identify the change. Conversely, an explicit note may omit an endpoint or conflict with later edits. Ask only when the remaining alternatives imply different consequential changes. Preserve actual answers and corrections as new entries in [project history](project-history.md); load that context before revising the plan. Earlier code provides provenance and possible design context, not a command to replay.
+
 Format-only examples below do not prescribe electrical design:
 
 | Evidence and wording | Treatment |
@@ -39,6 +41,8 @@ Required v1 top-level fields:
 New plans should include `context.userRequest`, recording the present explicit request separately from the original export. `context.preferenceIds` lists only applicable, confirmed entries actually loaded for the exact project. No preference means an empty array. Include assumptions/alternatives when useful. Older valid v1 plans remain readable for analysis, but must meet execution requirements before a write.
 
 Set `context.executionScope` to `analysis-only` or `authorized-repair` from the actual request. The analysis-only prompt omits write/check execution instructions. Round execution requires an explicit `authorized-repair` scope and nonempty `context.userRequest`; missing context cannot imply authorization. On a later explicit request, update this context and review the plan before execution.
+
+Writes also require `context.history`, the `{file,sha256,headId,projectId,documentId}` reference returned after recording the current report/request and preparing a fresh history context. The runner validates the file, current history head, scope and report/request/goal binding. Read the context before authoring the plan/code; a valid reference alone does not establish comprehension. Existing analysis-only plans without history remain supported. Rollback requests additionally use the explicit `context.rollback` record described in [project history](project-history.md#prepare-a-bounded-rollback).
 
 Each step requires `id,operation,documentId,targets,desiredState,preconditions,evidence,confidence,disposition,reason,verify`:
 

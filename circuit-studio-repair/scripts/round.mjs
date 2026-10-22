@@ -4,6 +4,7 @@ import { randomUUID } from 'node:crypto';
 import { pathToFileURL } from 'node:url';
 import { parseInput, compile, normalize, sha256, verifyLiveEvidence } from './report.mjs';
 import { discover, selectWindow, execute } from './bridge.mjs';
+import { verifyHistoryReview, lockHistory, appendRound, verifyRollback } from './history.mjs';
 
 const json = bytes => JSON.parse(bytes.toString('utf8').replace(/^\uFEFF/, ''));
 const encode = value => Buffer.from(JSON.stringify(value, null, 2) + '\n');
@@ -46,6 +47,13 @@ export async function verifyRound(file) {
   for (const field of ['roundId', 'documentId', 'inputSha256', 'status']) {
     if (result[field] !== record[field]) throw new Error('Execution result metadata mismatch: ' + field);
   }
+  if (record.projectId !== undefined) {
+    const historyBytes = archived.get('history-context.json');
+    if (!historyBytes || sha256(historyBytes) !== record.historyContextSha256) throw new Error('Archived history context hash mismatch');
+    const history = json(historyBytes);
+    if (history.projectId !== record.projectId || history.documentId !== record.documentId || history.headId !== record.historyHeadId
+        || plan.context?.history?.sha256 !== record.historyContextSha256) throw new Error('Archived history context scope mismatch');
+  }
   if (record.previousRoundId !== null) {
     const prior = archived.get('previous-round.json');
     if (!prior || sha256(prior) !== record.previousManifest?.sha256) throw new Error('Previous manifest hash mismatch.');
@@ -61,7 +69,7 @@ export async function executeRound(options) {
     [options.input, options.plan, options.code, options.baseline].map(file => fs.readFile(file)));
   const evidence = parseInput(inputBytes, { path: path.resolve(options.input), transport: 'file' });
   const plan = json(planBytes), baseline = json(baselineBytes);
-  const prompt = compile(plan, evidence);
+  compile(plan, evidence);
   if (plan.context?.executionScope !== 'authorized-repair') throw new Error('Record the current repair authorization in executionScope first.');
   requireText(plan.context?.userRequest, 'context.userRequest');
   const step = plan.steps.find(item => item.id === options.step);
@@ -75,6 +83,15 @@ export async function executeRound(options) {
   const verified = await verifyLiveEvidence(plan, path.dirname(path.resolve(options.plan)));
   const previous = options.previous ? await verifyRound(options.previous) : null;
   if (previous && previous.record.documentId !== step.documentId) throw new Error('Previous round belongs to a different document.');
+  const baseDir = path.dirname(path.resolve(options.plan));
+  const history = await verifyHistoryReview(plan, baseDir, step.documentId);
+  if (previous && !history.context.entries.some(entry => entry.roundId === previous.record.roundId)) throw new Error('Previous round is missing from the reviewed project history');
+  const rollback = await verifyRollback(plan, baseDir, options.baseline, history);
+  const prompt = compile(plan, evidence, history.context);
+  const releaseHistory = await lockHistory(history.dir);
+  try {
+  // Recheck after acquiring the lock; another report must not silently supersede the reviewed request.
+  await verifyHistoryReview(plan, baseDir, step.documentId);
 
   // A new directory prevents a changed request or script from overwriting history.
   const dir = path.resolve(options.outDir);
@@ -86,6 +103,7 @@ export async function executeRound(options) {
     previousManifest: previous ? { file: previous.file, sha256: previous.sha256 } : null,
     startedAt: new Date().toISOString(), finishedAt: null,
     documentId: step.documentId, windowId: null, stepId: step.id,
+    projectId: history.context.projectId, historyHeadId: history.context.headId, historyContextSha256: history.reference.sha256,
     inputSha256: evidence.provenance.sha256, planSha256: sha256(planBytes), codeSha256: sha256(codeBytes),
     status: 'not-executed', artifacts: [],
     stages: { preflight: 'not-run', execution: 'not-run', readback: 'not-run', drc: 'not-run' },
@@ -108,6 +126,8 @@ export async function executeRound(options) {
     await save('repair-prompt.md', Buffer.from(prompt));
     await save('patch.js', codeBytes);
     await save('baseline.json', baselineBytes);
+    await save('history-context.json', history.bytes);
+    if (rollback) await save('rollback-context.json', rollback.bytes);
     for (const [i, ref] of verified.entries()) {
       const bytes = await fs.readFile(ref.file);
       if (sha256(bytes) !== ref.sha256) throw new Error('Live evidence changed before archiving: ' + ref.file);
@@ -135,7 +155,11 @@ export async function executeRound(options) {
     } catch (error) {
       record.stages.execution = 'unknown'; record.errors.push({ stage: 'execution', message: error.message });
     }
-    await checkpoint();
+    try { await checkpoint(); record.stages.postWriteCheckpoint = 'saved'; }
+    catch (error) {
+      record.stages.postWriteCheckpoint = 'failed';
+      record.errors.push({ stage: 'recording', message: 'Post-write checkpoint failed: ' + error.message });
+    }
     // Readback and DRC are independent attempts. A failed/uncertain write is never retried.
     try {
       const after = await execute(base, record.windowId, 'inspect', { documentId: step.documentId });
@@ -152,7 +176,7 @@ export async function executeRound(options) {
       record.stages.drc = 'failed'; record.errors.push({ stage: 'drc', message: error.message });
     }
     record.status = record.stages.execution !== 'returned' ? 'execution-unknown'
-      : record.stages.readback !== 'captured' || record.stages.drc !== 'captured' ? 'executed-checks-incomplete'
+      : record.stages.postWriteCheckpoint === 'failed' || record.stages.readback !== 'captured' || record.stages.drc !== 'captured' ? 'executed-checks-incomplete'
       : 'executed-awaiting-review';
   } catch (error) {
     record.status = dispatched ? 'execution-unknown' : 'blocked';
@@ -166,14 +190,17 @@ export async function executeRound(options) {
       userRequest: plan.context.userRequest, goal: plan.goal, preserve: plan.preserve,
       steps: [{ id: step.id, execution: record.stages.execution, targets: step.targets, desiredState: step.desiredState,
         evidence: step.evidence, verification: step.verify.map(check => ({ check, status: 'not-assessed' })) }],
-      checks: { readback: record.stages.readback, drcCapture: record.stages.drc, drcStatus,
+      checks: { readback: record.stages.readback, drcCapture: record.stages.drc, drcStatus, postWriteCheckpoint: record.stages.postWriteCheckpoint ?? 'not-run',
         requirements: 'not-assessed', preservation: 'not-assessed' },
       remaining: ['Agent/user review of changed state, requested goal and preservation constraints is still required.',
         'A returned Bridge call or complete DRC log does not establish repair or electrical correctness.'], errors: record.errors
     });
     await checkpoint();
   }
+  try { await appendRound(history.dir, path.join(dir, 'round.json'), { locked: true }); }
+  catch (error) { throw new Error('Round saved at ' + path.join(dir, 'round.json') + '; history append failed: ' + error.message + '. Inspect the saved outcome and use history.mjs import-round; do not repeat the write.'); }
   return { file: path.join(dir, 'round.json'), record };
+  } finally { await releaseHistory(); }
 }
 
 async function main() {

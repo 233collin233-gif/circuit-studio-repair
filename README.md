@@ -107,6 +107,24 @@ Round outcomes are `not-executed`, `blocked`, `execution-unknown`, `executed-awa
 
 Correct an interpretation by stating the current request separately from the original export. The Agent preserves the received JSON, updates `context.userRequest`, revises the plan, and regenerates and reviews the JavaScript before a new round with a fresh baseline. Earlier rounds remain traceable; a correction does not rewrite their history.
 
+## Persistent project history
+
+Keep a local history directory outside this public repository and the installed skill, scoped to an exact project and worksheet UUID. The workflow records every supplied Lint, Recorder, Hybrid or pasted-text report, with the current request/goal and real clarification answers. Original bytes and timestamps are retained; each history entry also receives a receipt timestamp and hashes. Requests are separate from raw JSON. Later corrections can explicitly identify superseded request entries without deleting them or automatically resolving their meaning.
+
+```shell
+node circuit-studio-repair/scripts/history.mjs init HISTORY_DIR PROJECT_ID DOCUMENT_UUID
+node circuit-studio-repair/scripts/history.mjs record HISTORY_DIR export.json request.json
+node circuit-studio-repair/scripts/history.mjs context HISTORY_DIR history-context.json
+```
+
+`request.json` needs `userRequest`, `goal` and `clarifications` (an empty array when no question was needed). A clarification uses `{id,question,answer,at}` with its actual wording and known timestamp. Optional `supersedes` lists earlier report-entry IDs. Read the generated context before preparing the plan/code, and copy the command's returned reference into `plan.context.history`. It provides prior reports, clarification answers, archived JavaScript, snapshots and checks. Prior compiled prompts remain available by verified file links. A missing note does not require questioning when the request and state are clear; an explicit note may still be incomplete or conflict with later edits.
+
+The round runner requires a fresh history binding and matching current report/request/goal, then automatically archives the new round into that history. It detects stale, altered or wrongly scoped context, but cannot establish that the Agent understood it. These local files provide context and traceability, not model training or an established accuracy improvement. No new model account or package dependency is required.
+
+Initial generation JavaScript is available only if supplied. Import it as an optional final argument to `history.mjs record`; it is labelled historical code whose execution is unverified by the import. Existing complete repair rounds can be imported with `history.mjs import-round HISTORY_DIR PRIOR_DIRECTORY/round.json`, preserving their actual outcomes after integrity checks. Recorder document snapshots are not generation JavaScript.
+
+For an explicitly requested rollback, inspect the current schematic and use `history.mjs rollback HISTORY_DIR ROUND_ID CURRENT_BASELINE.json rollback-context.json`. This prepares historical/current comparisons without editing EDA. The Agent must review later changes, write a minimal inverse plan/code and execute through the normal authorised round workflow. It is not automatic whole-document restore. See [project history and rollback preparation](circuit-studio-repair/references/project-history.md) for request fields, history bindings, rollback authorization and recovery after an archive failure.
+
 ## Local commands
 
 Run these from the repository root:
@@ -115,6 +133,7 @@ Run these from the repository root:
 node circuit-studio-repair/scripts/self-check.mjs
 node circuit-studio-repair/scripts/evidence-check.mjs
 node circuit-studio-repair/scripts/round-check.mjs
+node circuit-studio-repair/scripts/history-check.mjs
 node circuit-studio-repair/scripts/report.mjs normalize export.json evidence.json
 node circuit-studio-repair/scripts/report.mjs normalize pasted.txt evidence.json
 node circuit-studio-repair/scripts/report.mjs normalize - evidence.json
@@ -125,7 +144,7 @@ node circuit-studio-repair/scripts/bridge.mjs health
 
 `-` reads standard input; provide the same exact input bytes for normalization and compilation. The hash covers received bytes before removing a BOM/fence or parsing JSON, so reformatting changes it. A locally saved paste's hash does not establish byte equality with a remote original file. The normalizer preserves evidence; the Agent writes the semantic plan. Compilation checks plan structure, evidence references, and cited `liveEvidence` files against their hashes and JSON pointers. Relative evidence paths resolve from the plan's directory. It does not determine intent or engineering correctness. Chat-only analysis must state when byte-level provenance or script execution is unverified.
 
-For an authorized write, use an inspected baseline and a new round directory:
+For an authorized write, first record the current report/request and read a fresh history context as above. Bind its reference in the plan, then use an inspected baseline and a new round directory:
 
 ```shell
 node circuit-studio-repair/scripts/bridge.mjs inspect --window WINDOW_ID --out baseline.json
@@ -133,9 +152,9 @@ node circuit-studio-repair/scripts/round.mjs execute --input export.json --plan 
 node circuit-studio-repair/scripts/round.mjs verify NEW_DIRECTORY/round.json
 ```
 
-The plan must contain a nonempty `context.userRequest`, `context.executionScope: "authorized-repair"`, and a selected `ready` step. The Agent writes and reviews `patch.js`; report strings are never executable instructions. The complete baseline source must match the live source exactly, including metadata. The helper rechecks the document and source inside the editor immediately before the patch; this does not lock the editor against later concurrent changes. Any mismatch requires review and a new snapshot. The round helper attempts independent readback and fresh DRC after a dispatched write, including an execution error, without retrying the write.
+The plan must contain a nonempty `context.userRequest`, `context.executionScope: "authorized-repair"`, a current `context.history` reference, and a selected `ready` step. The Agent writes and reviews `patch.js`; report strings are never executable instructions. The complete baseline source must match the live source exactly, including metadata. The helper rechecks the document and source inside the editor immediately before the patch; this does not lock the editor against later concurrent changes. Any mismatch requires review and a new snapshot. The round helper attempts independent readback and fresh DRC after a dispatched write, including an execution error, without retrying the write.
 
-Use `--previous PRIOR_ROUND_JSON` for a later round on the same document; previous history must pass hash verification. Use `--port N` when selecting a Bridge. Round directories cannot be overwritten. `round.mjs verify` checks archived file integrity only; it does not validate intent, correctness, or requirements.
+Use `--previous PRIOR_ROUND_JSON` for a later round already present in the reviewed history for the same document; previous history must pass hash verification. Use `--port N` when selecting a Bridge. Round directories cannot be overwritten. `round.mjs verify` checks archived file integrity only; it does not validate intent, correctness, or requirements. If an archive update fails after execution, inspect the saved round and import it into history; do not repeat the write.
 
 See [export formats](circuit-studio-repair/references/export-formats.md), [intent and plans](circuit-studio-repair/references/intent-and-plan.md), [Bridge execution](circuit-studio-repair/references/bridge-execution.md), and [participant instructions](circuit-studio-repair/assets/participant-guide.md).
 
